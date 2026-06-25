@@ -1,0 +1,54 @@
+/* ── Reset & Base ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: #f5f7fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent iOS text size adjustment */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── Mobile tap highlight ─────────────────────────────────────── */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ── Input autofill override ─────────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px rgba(15, 52, 96, 0.9) inset;
+  -webkit-text-fill-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 2px;
+}
+
+/* ── Arabic font fallback ────────────────────────────────────── */
+@font-face {
+  font-family: 'ArabicFallback';
+  src: local('Arial'), local('Tahoma'), local('Helvetica');
+}
