@@ -2,16 +2,16 @@
 export const TERMS = {
   anatomy: {
     cardiac: [
-      { en: "Myocardium", ar: "عضلة القلب", example: "The myocardium is the muscular wall of the heart.", image: "/images/terms/cardiac/myocardium.png" },
-      { en: "Pericardium", ar: "غلاف القلب", example: "The pericardium is the fibrous sac surrounding the heart.", image: "/images/terms/cardiac/pericardium.png" },
-      { en: "Endocardium", ar: "الشغاف الداخلي", example: "The endocardium lines the inner chambers of the heart.", image: "/images/terms/cardiac/endocardium.png" },
-      { en: "Aorta", ar: "الشريان الأورطي", example: "The aorta is the largest artery in the body.", image: "/images/terms/cardiac/aorta.png" },
-      { en: "Mitral Valve", ar: "الصمام التاجي", example: "The mitral valve separates the left atrium from the left ventricle.", image: "/images/terms/cardiac/mitral-valve.png" },
-      { en: "Coronary Artery", ar: "الشريان التاجي", example: "Coronary arteries supply blood to the heart muscle.", image: "/images/terms/cardiac/coronary-artery.png" },
-      { en: "Left Ventricle", ar: "البطين الأيسر", example: "The left ventricle pumps oxygenated blood to the body.", image: "/images/terms/cardiac/left-ventricle.png" },
-      { en: "Right Atrium", ar: "الأذين الأيمن", example: "The right atrium receives deoxygenated blood from the body.", image: "/images/terms/cardiac/right-atrium.png" },
-      { en: "Pulmonary Artery", ar: "الشريان الرئوي", example: "The pulmonary artery carries deoxygenated blood to the lungs.", image: "/images/terms/cardiac/pulmonary-artery.png" },
-      { en: "Sinoatrial Node", ar: "العقدة الجيبية الأذينية", example: "The sinoatrial node is the natural pacemaker of the heart.", image: "/images/terms/cardiac/sinoatrial-node.png" },
+      { en: "Myocardium", ar: "عضلة القلب", definition: "The thick muscle layer of the heart that contracts to pump blood.", example: "The myocardium is the muscular wall of the heart.", image: "/images/terms/cardiac/myocardium.png" },
+      { en: "Pericardium", ar: "غلاف القلب", definition: "A protective sac that surrounds the heart.", example: "The pericardium protects the heart and helps it move smoothly.", image: "/images/terms/cardiac/pericardium.png" },
+      { en: "Endocardium", ar: "الشغاف الداخلي", definition: "The thin inner lining of the heart chambers and valves.", example: "The endocardium lines the inside of the heart.", image: "/images/terms/cardiac/endocardium.png" },
+      { en: "Aorta", ar: "الشريان الأورطي", definition: "The main artery that carries oxygen-rich blood from the heart to the body.", example: "The aorta carries blood from the left ventricle to the body.", image: "/images/terms/cardiac/aorta.png" },
+      { en: "Mitral Valve", ar: "الصمام التاجي", definition: "A valve between the left atrium and left ventricle that prevents blood from flowing backward.", example: "The mitral valve opens so blood can enter the left ventricle.", image: "/images/terms/cardiac/mitral_valve.png" },
+      { en: "Coronary Artery", ar: "الشريان التاجي", definition: "An artery that supplies the heart muscle with oxygen-rich blood.", example: "Coronary arteries bring oxygen to the myocardium.", image: "/images/terms/cardiac/coronary_artery.png" },
+      { en: "Left Ventricle", ar: "البطين الأيسر", definition: "The lower left heart chamber that pumps oxygen-rich blood to the body.", example: "The left ventricle pumps blood into the aorta.", image: "/images/terms/cardiac/left_ventricle.png" },
+      { en: "Right Atrium", ar: "الأذين الأيمن", definition: "The upper right heart chamber that receives oxygen-poor blood from the body.", example: "The right atrium receives blood returning from the body.", image: "/images/terms/cardiac/right_atrium.png" },
+      { en: "Pulmonary Artery", ar: "الشريان الرئوي", definition: "The artery that carries oxygen-poor blood from the heart to the lungs.", example: "The pulmonary artery carries blood from the right ventricle to the lungs.", image: "/images/terms/cardiac/pulmonary_artery.png" },
+      { en: "Sinoatrial Node", ar: "العقدة الجيبية الأذينية", definition: "A small group of cells that starts the heartbeat.", example: "The sinoatrial node sets the heart's normal rhythm.", image: "/images/terms/cardiac/sinoatrial_node.png" },
     ],
     skeletal: [
       { en: "Femur", ar: "عظمة الفخذ", example: "The femur is the longest bone in the body." },
