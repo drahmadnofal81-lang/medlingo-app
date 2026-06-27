@@ -215,8 +215,6 @@ function Quiz({ terms, onFinish }) {
   const [aiFeedback, setAiFeedback] = useState(null);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
-  const current = terms[qIndex];
-
   // Build options: 1 correct + 3 random wrong
   const buildOptions = (term, allTerms) => {
     const others = allTerms.filter(t => t.en !== term.en);
@@ -224,9 +222,38 @@ function Quiz({ terms, onFinish }) {
     return [...shuffled, term].sort(() => Math.random() - 0.5);
   };
 
-  const [options] = useState(() => terms.map(t => buildOptions(t, terms)));
+  const [questions] = useState(() => terms.flatMap(term => {
+    if (term.quizQuestions?.length) {
+      return term.quizQuestions.map((quizQuestion, index) => ({
+        ...quizQuestion,
+        term,
+        id: `${term.en}-${index}`,
+        prompt: quizQuestion.prompt || term.en,
+        optionsList: Object.entries(quizQuestion.options).map(([key, value]) => ({ key, value })),
+      }));
+    }
+
+    return [{
+      term,
+      id: term.en,
+      question: "ما معنى هذا المصطلح؟",
+      prompt: term.en,
+      optionsList: buildOptions(term, terms).map(opt => ({
+        value: opt.ar,
+        isCorrect: opt.en === term.en,
+      })),
+    }];
+  }));
+
+  const current = questions[qIndex];
+  const currentTerm = current.term;
 
   async function getAiFeedback(isCorrect, term, chosenAr) {
+    if (current.explanation) {
+      setAiFeedback(current.explanation);
+      return;
+    }
+
     setLoadingFeedback(true);
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -253,31 +280,33 @@ function Quiz({ terms, onFinish }) {
   function handleSelect(opt) {
     if (selected) return;
     setSelected(opt);
-    const correct = opt.en === current.en;
+    const correct = opt.isCorrect ?? opt.key === current.correctAnswer;
     if (correct) setScore(s => s + 1);
-    getAiFeedback(correct, current, opt.ar);
+    getAiFeedback(correct, currentTerm, opt.value);
   }
 
   function next() {
     setSelected(null);
     setAiFeedback(null);
-    if (qIndex + 1 >= terms.length) onFinish(score + (selected?.en === current.en ? 1 : 0));
+    if (qIndex + 1 >= questions.length) {
+      onFinish(score + ((selected?.isCorrect ?? selected?.key === current.correctAnswer) ? 1 : 0));
+    }
     else setQIndex(i => i + 1);
   }
 
-  const isCorrect = selected?.en === current.en;
+  const isCorrect = selected && (selected.isCorrect ?? selected.key === current.correctAnswer);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "center" }}>
       {/* Progress */}
       <div style={{ width: "100%", maxWidth: 420 }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#666", marginBottom: 6 }}>
-          <span>سؤال {qIndex + 1} من {terms.length}</span>
+          <span>سؤال {qIndex + 1} من {questions.length}</span>
           <span>✅ {score} صح</span>
         </div>
         <div style={{ background: "#e9ecef", borderRadius: 99, height: 8 }}>
           <div style={{ height: 8, borderRadius: 99, background: "linear-gradient(90deg,#2A9D8F,#457B9D)",
-            width: `${((qIndex) / terms.length) * 100}%`, transition: "width 0.4s" }} />
+            width: `${((qIndex) / questions.length) * 100}%`, transition: "width 0.4s" }} />
         </div>
       </div>
 
@@ -287,15 +316,15 @@ function Quiz({ terms, onFinish }) {
         color: "#fff", borderRadius: 20, padding: "28px 24px",
         width: "100%", maxWidth: 420, textAlign: "center",
       }}>
-        <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 10 }}>ما معنى هذا المصطلح؟</div>
-        <div style={{ fontSize: 32, fontWeight: 900, color: "#FFD700" }}>{current.en}</div>
+        <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 10 }}>{current.question}</div>
+        <div style={{ fontSize: 32, fontWeight: 900, color: "#FFD700" }}>{current.prompt}</div>
       </div>
 
       {/* Options */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%", maxWidth: 420 }}>
-        {options[qIndex].map((opt, i) => {
-          const isRight = opt.en === current.en;
-          const isPicked = selected?.en === opt.en;
+        {current.optionsList.map((opt, i) => {
+          const isRight = opt.isCorrect ?? opt.key === current.correctAnswer;
+          const isPicked = selected === opt;
           let bg = "#fff", border = "2px solid #dee2e6", color = "#333";
           if (selected) {
             if (isRight) { bg = "#d1fae5"; border = "2px solid #10b981"; color = "#065f46"; }
@@ -307,7 +336,7 @@ function Quiz({ terms, onFinish }) {
               color, fontWeight: 600, fontSize: 15, cursor: selected ? "default" : "pointer",
               direction: "rtl", transition: "all 0.2s",
             }}>
-              {opt.ar}
+              {opt.key ? `${opt.key}. ${opt.value}` : opt.value}
             </button>
           );
         })}
@@ -336,7 +365,7 @@ function Quiz({ terms, onFinish }) {
           padding: "14px 40px", fontWeight: 700, fontSize: 16,
           cursor: "pointer", width: "100%", maxWidth: 420,
         }}>
-          {qIndex + 1 >= terms.length ? "🏁 انتهى الاختبار!" : "التالي ←"}
+          {qIndex + 1 >= questions.length ? "🏁 انتهى الاختبار!" : "التالي ←"}
         </button>
       )}
     </div>
@@ -779,6 +808,10 @@ function modeButtonStyle(color) {
   };
 }
 
+function getQuizQuestionCount(terms) {
+  return terms.reduce((total, term) => total + (term.quizQuestions?.length || 1), 0);
+}
+
 function ResultCard({ emoji, title, lines, onContinue }) {
   return (
     <div style={{
@@ -902,6 +935,7 @@ function App() {
   const currentSubtab = subtabList.find(s => s.id === subtab);
   const currentSubtabLabel = currentSubtab ? `${currentSubtab.label} · ${currentSubtab.en}` : "";
   const activeTerms = category && subtab ? TERMS[category][subtab] : [];
+  const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
 
   if (view === "register") {
     return <RegisterPage onRegister={(u) => { setUser(u); setView("splash"); }} />;
@@ -1067,7 +1101,7 @@ function App() {
               <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
                 📝 اختبار سريع
                 <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
-                  {activeTerms.length} سؤال
+                  {activeQuizQuestionCount} سؤال
                 </div>
               </button>
             </div>
@@ -1115,15 +1149,15 @@ function App() {
         {view === "quizAvatar" && (
           <AvatarTransition
             onContinue={() => setView("quizResults")}
-            message={`نتيجتك: ${quizScore} من ${activeTerms.length} ⭐`}
+            message={`نتيجتك: ${quizScore} من ${activeQuizQuestionCount} ⭐`}
           />
         )}
 
         {view === "quizResults" && (
           <ResultCard
-            emoji={quizScore === activeTerms.length ? "🏆" : "✅"}
+            emoji={quizScore === activeQuizQuestionCount ? "🏆" : "✅"}
             title="انتهى الاختبار!"
-            lines={[`النتيجة: ${quizScore} من ${activeTerms.length}`, `+${quizScore * 10} نقطة خبرة`]}
+            lines={[`النتيجة: ${quizScore} من ${activeQuizQuestionCount}`, `+${quizScore * 10} نقطة خبرة`]}
             onContinue={() => setView("mode")}
           />
         )}
