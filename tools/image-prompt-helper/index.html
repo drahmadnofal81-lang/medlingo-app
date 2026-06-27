@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedLingo Image Prompt Helper</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="helper">
+      <header>
+        <p class="eyebrow">MedLingo cardiac images</p>
+        <h1 id="termName">Myocardium</h1>
+        <p class="filename">Suggested filename: <span id="filename">myocardium.png</span></p>
+      </header>
+
+      <section class="prompt-panel" aria-label="Generated prompt">
+        <textarea id="promptText" readonly></textarea>
+      </section>
+
+      <section class="actions" aria-label="Prompt controls">
+        <button id="previousButton" type="button">Previous Term</button>
+        <button id="copyButton" type="button" class="primary">Copy Prompt</button>
+        <button id="nextButton" type="button">Next Term</button>
+      </section>
+
+      <p id="copyStatus" class="status" aria-live="polite"></p>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

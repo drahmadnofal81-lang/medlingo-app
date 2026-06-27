@@ -1,0 +1,29 @@
+1. Myocardium
+Create ONE single image only of the Myocardium. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Myocardium. Include only one English label, exactly: "Myocardium". The image must be 1024x1024.
+
+2. Pericardium
+Create ONE single image only of the Pericardium. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Pericardium. Include only one English label, exactly: "Pericardium". The image must be 1024x1024.
+
+3. Endocardium
+Create ONE single image only of the Endocardium. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Endocardium. Include only one English label, exactly: "Endocardium". The image must be 1024x1024.
+
+4. Aorta
+Create ONE single image only of the Aorta. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Aorta. Include only one English label, exactly: "Aorta". The image must be 1024x1024.
+
+5. Mitral Valve
+Create ONE single image only of the Mitral Valve. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Mitral Valve. Include only one English label, exactly: "Mitral Valve". The image must be 1024x1024.
+
+6. Coronary Artery
+Create ONE single image only of the Coronary Artery. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Coronary Artery. Include only one English label, exactly: "Coronary Artery". The image must be 1024x1024.
+
+7. Left Ventricle
+Create ONE single image only of the Left Ventricle. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Left Ventricle. Include only one English label, exactly: "Left Ventricle". The image must be 1024x1024.
+
+8. Right Atrium
+Create ONE single image only of the Right Atrium. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Right Atrium. Include only one English label, exactly: "Right Atrium". The image must be 1024x1024.
+
+9. Pulmonary Artery
+Create ONE single image only of the Pulmonary Artery. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Pulmonary Artery. Include only one English label, exactly: "Pulmonary Artery". The image must be 1024x1024.
+
+10. Sinoatrial Node
+Create ONE single image only of the Sinoatrial Node. No collage. No grid. No multiple panels. Use a clean white background. Show the relevant cardiac anatomy in a semi-realistic 3D medical textbook style. Add one black arrow pointing to the requested structure: Sinoatrial Node. Include only one English label, exactly: "Sinoatrial Node". The image must be 1024x1024.
