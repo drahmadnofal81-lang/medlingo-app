@@ -13,6 +13,8 @@ const CATEGORIES = [
   { id: "pathology",    label: "🔴 باثولوجي",     en: "Pathology",     color: "#B22222", desc: "أمراض وآليات" },
 ];
 
+const INTERACTIVE_CATEGORIES = new Set(["organs", "anatomy", "histology"]);
+
 // ── Sub-tabs per category ────────────────────────────────────────────────────
 const SUBTABS = {
   anatomy: [
@@ -207,6 +209,65 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
           flex: 1, padding: "14px 0", borderRadius: 14,
           background: "#d1fae5", border: "none", color: "#065f46",
           fontWeight: 900, fontSize: 24, cursor: "pointer",
+        }}>
+          →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
+  if (!term) return null;
+
+  const definitionText = term.definition || term.example || "";
+  const exampleText = term.example || "";
+  const showExample = exampleText.trim() && exampleText.trim() !== definitionText.trim();
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+      <div style={{
+        width: "100%", maxWidth: 420,
+        borderRadius: 24,
+        background: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
+        color: "#fff", display: "flex", flexDirection: "column",
+        alignItems: "center", padding: "24px 24px 20px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        position: "relative", overflow: "hidden",
+        boxSizing: "border-box",
+      }}>
+        <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: 1, marginBottom: 8, textAlign: "center", color: "#FFD700", direction: "ltr" }}>
+          {term.en}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: "#fbbf24", textAlign: "center", direction: "rtl", marginBottom: 10 }}>
+          {term.ar}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92 }}>
+          {definitionText}
+        </div>
+        {showExample && (
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, marginTop: 10 }}>
+            {exampleText}
+          </div>
+        )}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
+          background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
+      </div>
+
+      <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420, direction: "ltr" }}>
+        <button onClick={onPrevious} disabled={!canPrevious} style={{
+          flex: 1, padding: "14px 0", borderRadius: 14,
+          background: "#fff3cd", border: "none", color: "#856404",
+          fontWeight: 900, fontSize: 24, cursor: canPrevious ? "pointer" : "not-allowed",
+          opacity: canPrevious ? 1 : 0.45,
+        }}>
+          ←
+        </button>
+        <button onClick={onNext} disabled={!canNext} style={{
+          flex: 1, padding: "14px 0", borderRadius: 14,
+          background: "#d1fae5", border: "none", color: "#065f46",
+          fontWeight: 900, fontSize: 24, cursor: canNext ? "pointer" : "not-allowed",
+          opacity: canNext ? 1 : 0.45,
         }}>
           →
         </button>
@@ -1101,6 +1162,7 @@ function App() {
 
   function openSubtab(subId) {
     setSubtab(subId);
+    setCardIndex(0);
     setView("mode");
   }
 
@@ -1112,7 +1174,7 @@ function App() {
     setCardIndex(result.termIndex);
     setKnownCount(0);
     setSearchQuery("");
-    setView("flashcards");
+    setView(INTERACTIVE_CATEGORIES.has(result.category) ? "flashcards" : "mode");
   }
 
   function startFlashcards() {
@@ -1156,6 +1218,10 @@ function App() {
     advanceCard(queue);
   }
 
+  function handleNextReferenceTerm() {
+    setCardIndex(i => Math.min(activeTerms.length - 1, i + 1));
+  }
+
   function handleQuizFinish(score) {
     setQuizScore(score);
     setXp(x => x + score * 10);
@@ -1168,6 +1234,7 @@ function App() {
   const currentSubtab = subtabList.find(s => s.id === subtab);
   const currentSubtabLabel = currentSubtab ? `${currentSubtab.label} · ${currentSubtab.en}` : "";
   const activeTerms = category && subtab ? TERMS[category][subtab] : [];
+  const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
   const visibleCategories = CATEGORIES.filter(cat => {
     const q = searchQuery.trim().toLowerCase();
@@ -1376,20 +1443,38 @@ function App() {
         {view === "mode" && currentCategory && (
           <>
             <BackBar onBack={() => setView("subtabs")} title={currentSubtabLabel} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 20 }}>
-              <button onClick={startFlashcards} style={modeButtonStyle(currentCategory.color)}>
-                🃏 بطاقات تعليمية
-                <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
-                  {activeTerms.length} مصطلح
-                </div>
-              </button>
-              <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
-                📝 اختبار سريع
-                <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
-                  {activeQuizQuestionCount} سؤال
-                </div>
-              </button>
-            </div>
+            {isInteractiveMode ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 20 }}>
+                <button onClick={startFlashcards} style={modeButtonStyle(currentCategory.color)}>
+                  🃏 بطاقات تعليمية
+                  <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
+                    {activeTerms.length} مصطلح
+                  </div>
+                </button>
+                <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
+                  📝 اختبار سريع
+                  <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
+                    {activeQuizQuestionCount} سؤال
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 20 }}>
+                <ReferenceTerms
+                  term={activeTerms[cardIndex]}
+                  onPrevious={handlePreviousCard}
+                  onNext={handleNextReferenceTerm}
+                  canPrevious={cardIndex > 0}
+                  canNext={cardIndex + 1 < activeTerms.length}
+                />
+                <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
+                  📝 اختبار سريع
+                  <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
+                    {activeQuizQuestionCount} سؤال
+                  </div>
+                </button>
+              </div>
+            )}
           </>
         )}
 
