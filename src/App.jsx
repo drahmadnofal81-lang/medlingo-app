@@ -3,12 +3,12 @@ import { TERMS } from "./data/terms";
 
 // ── Main Categories ──────────────────────────────────────────────────────────
 const CATEGORIES = [
+  { id: "organs",       label: "🫁 أعضاء الجسم", en: "Body Organs",   color: "#6B4226", desc: "أعضاء رئيسية" },
   { id: "anatomy",      label: "🫀 تشريح",       en: "Anatomy",      color: "#E63946", desc: "مقسّم بالجهاز" },
   { id: "physiology",   label: "⚡ فسيولوجيا",   en: "Physiology",   color: "#2A9D8F", desc: "مرتّب بالموضوع" },
   { id: "biochemistry", label: "🧪 بيوكيمياء",   en: "Biochemistry", color: "#F4A261", desc: "جزيئات وتفاعلات" },
   { id: "histology",    label: "🔬 هيستولوجيا",  en: "Histology",    color: "#7B2D8B", desc: "أنسجة وخلايا" },
   { id: "bodysystems",  label: "🏥 أنظمة الجسم", en: "Body Systems",  color: "#1A6B9A", desc: "٨ أنظمة رئيسية" },
-  { id: "organs",       label: "🫁 أعضاء الجسم", en: "Body Organs",   color: "#6B4226", desc: "أعضاء رئيسية" },
   { id: "pharmacology", label: "💊 فارماكولوجي",  en: "Pharmacology",  color: "#5C4D91", desc: "أدوية وتأثيرات" },
   { id: "pathology",    label: "🔴 باثولوجي",     en: "Pathology",     color: "#B22222", desc: "أمراض وآليات" },
 ];
@@ -46,12 +46,7 @@ const SUBTABS = {
     { id: "cell",          label: "🔵 الخلية", en: "Cell" },
   ],
   organs: [
-    { id: "heart",    label: "🫀 القلب",         en: "Heart" },
-    { id: "lungs",    label: "🫁 الرئتان",        en: "Lungs" },
-    { id: "liver",    label: "🟤 الكبد",          en: "Liver" },
-    { id: "kidneys",  label: "🫘 الكليتان",       en: "Kidneys" },
-    { id: "brain",    label: "🧠 الدماغ",         en: "Brain" },
-    { id: "skin",     label: "🩹 الجلد",          en: "Skin" },
+    { id: "main", label: "🫁 أعضاء الجسم", en: "Body Organs" },
   ],
   pharmacology: [
     { id: "analgesics",    label: "💊 مسكنات",        en: "Analgesics" },
@@ -87,9 +82,9 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
   const [imageError, setImageError] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const imageSrc = typeof term.image === "string" ? term.image.trim() : "";
+  const imageBase = imageSrc.replace(/\.[^/.]+$/, "");
   const imageCandidates = imageSrc
-    ? [imageSrc, ...[".webp", ".png", ".jpg", ".jpeg"].map(ext => imageSrc.replace(/\.[^/.]+$/, ext))]
-        .filter((src, index, all) => src && all.indexOf(src) === index)
+    ? [".webp", ".png", ".jpg", ".jpeg"].map(ext => `${imageBase}${ext}`)
     : [];
   const currentImageSrc = imageCandidates[imageIndex] || "";
 
