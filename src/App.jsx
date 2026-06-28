@@ -85,11 +85,18 @@ function FlashCard({ term, onKnow, onStudyMore }) {
   const [loading, setLoading] = useState(false);
   const [aiHint, setAiHint] = useState(null);
   const [imageError, setImageError] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
   const imageSrc = typeof term.image === "string" ? term.image.trim() : "";
+  const imageCandidates = imageSrc
+    ? [imageSrc, ...[".webp", ".png", ".jpg", ".jpeg"].map(ext => imageSrc.replace(/\.[^/.]+$/, ext))]
+        .filter((src, index, all) => src && all.indexOf(src) === index)
+    : [];
+  const currentImageSrc = imageCandidates[imageIndex] || "";
 
   useEffect(() => {
     setAiHint(null);
     setImageError(false);
+    setImageIndex(0);
   }, [term]);
 
   async function getAiHint() {
@@ -136,12 +143,15 @@ function FlashCard({ term, onKnow, onStudyMore }) {
           fontSize: 64, border: "1.5px dashed rgba(255,255,255,0.15)",
           overflow: "hidden",
         }}>
-          {imageSrc && !imageError ? (
+          {currentImageSrc && !imageError ? (
             <img
-              key={imageSrc}
-              src={imageSrc}
+              key={currentImageSrc}
+              src={currentImageSrc}
               alt={term.en}
-              onError={() => setImageError(true)}
+              onError={() => {
+                if (imageIndex + 1 < imageCandidates.length) setImageIndex(i => i + 1);
+                else setImageError(true);
+              }}
               style={{ maxWidth: "100%", height: "auto", maxHeight: "100%", objectFit: "contain", display: "block" }}
             />
           ) : (

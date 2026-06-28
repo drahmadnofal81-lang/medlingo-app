@@ -7,7 +7,7 @@ export const TERMS = {
         ar: "عضلة القلب",
         definition: "The thick muscle layer of the heart that contracts to pump blood.",
         example: "The myocardium is the muscular wall of the heart.",
-        image: "/images/terms/cardiac/myocardium.png",
+        image: "/images/terms/cardiac/myocardium.webp",
         quizQuestions: [
           {
             question: "What does Myocardium mean?",
@@ -39,7 +39,7 @@ export const TERMS = {
         ar: "غلاف القلب",
         definition: "A protective sac that surrounds the heart.",
         example: "The pericardium protects the heart and helps it move smoothly.",
-        image: "/images/terms/cardiac/pericardium.png",
+        image: "/images/terms/cardiac/pericardium.webp",
         quizQuestions: [
           {
             question: "What does Pericardium mean?",
@@ -71,7 +71,7 @@ export const TERMS = {
         ar: "الشغاف الداخلي",
         definition: "The thin inner lining of the heart chambers and valves.",
         example: "The endocardium lines the inside of the heart.",
-        image: "/images/terms/cardiac/endocardium.png",
+        image: "/images/terms/cardiac/endocardium.webp",
         quizQuestions: [
           {
             question: "What does Endocardium mean?",
@@ -103,7 +103,7 @@ export const TERMS = {
         ar: "الشريان الأورطي",
         definition: "The main artery that carries oxygen-rich blood from the heart to the body.",
         example: "The aorta carries blood from the left ventricle to the body.",
-        image: "/images/terms/cardiac/aorta.png",
+        image: "/images/terms/cardiac/aorta.webp",
         quizQuestions: [
           {
             question: "What does Aorta mean?",
@@ -135,7 +135,7 @@ export const TERMS = {
         ar: "الصمام التاجي",
         definition: "A valve between the left atrium and left ventricle that prevents blood from flowing backward.",
         example: "The mitral valve opens so blood can enter the left ventricle.",
-        image: "/images/terms/cardiac/mitral_valve.png",
+        image: "/images/terms/cardiac/mitral_valve.webp",
         quizQuestions: [
           {
             question: "What does Mitral Valve mean?",
@@ -167,35 +167,35 @@ export const TERMS = {
         ar: "الصمام ثلاثي الشرفات",
         definition: "A valve between the right atrium and right ventricle that prevents blood from flowing backward.",
         example: "The tricuspid valve opens so blood can move from the right atrium to the right ventricle.",
-        image: "/images/terms/cardiac/tricuspid_valve.png",
+        image: "/images/terms/cardiac/tricuspid_valve.webp",
       },
       {
         en: "Aortic Valve",
         ar: "الصمام الأبهري",
         definition: "A valve between the left ventricle and aorta that controls blood flow to the body.",
         example: "The aortic valve opens when the left ventricle pumps blood into the aorta.",
-        image: "/images/terms/cardiac/aortic_valve.png",
+        image: "/images/terms/cardiac/aortic_valve.webp",
       },
       {
         en: "Pulmonary Valve",
         ar: "الصمام الرئوي",
         definition: "A valve between the right ventricle and pulmonary artery that controls blood flow to the lungs.",
         example: "The pulmonary valve opens as blood leaves the right ventricle for the lungs.",
-        image: "/images/terms/cardiac/pulmonary_valve.png",
+        image: "/images/terms/cardiac/pulmonary_valve.webp",
       },
       {
         en: "Coronary Arteries",
         ar: "الشرايين التاجية",
         definition: "The arteries that supply oxygen-rich blood to the heart muscle.",
         example: "The coronary arteries branch over the heart to feed the myocardium.",
-        image: "/images/terms/cardiac/coronary_arteries.png",
+        image: "/images/terms/cardiac/coronary_arteries.webp",
       },
       {
         en: "Left Ventricle",
         ar: "البطين الأيسر",
         definition: "The lower left heart chamber that pumps oxygen-rich blood to the body.",
         example: "The left ventricle pumps blood into the aorta.",
-        image: "/images/terms/cardiac/left_ventricle.png",
+        image: "/images/terms/cardiac/left_ventricle.webp",
         quizQuestions: [
           {
             question: "What does Left Ventricle mean?",
@@ -227,21 +227,21 @@ export const TERMS = {
         ar: "البطين الأيمن",
         definition: "The lower right heart chamber that pumps oxygen-poor blood to the lungs.",
         example: "The right ventricle sends blood into the pulmonary artery.",
-        image: "/images/terms/cardiac/right_ventricle.png",
+        image: "/images/terms/cardiac/right_ventricle.webp",
       },
       {
         en: "Left Atrium",
         ar: "الأذين الأيسر",
         definition: "The upper left heart chamber that receives oxygen-rich blood from the lungs.",
         example: "The left atrium receives blood from the pulmonary veins.",
-        image: "/images/terms/cardiac/left_atrium.png",
+        image: "/images/terms/cardiac/left_atrium.webp",
       },
       {
         en: "Right Atrium",
         ar: "الأذين الأيمن",
         definition: "The upper right heart chamber that receives oxygen-poor blood from the body.",
         example: "The right atrium receives blood returning from the body.",
-        image: "/images/terms/cardiac/right_atrium.png",
+        image: "/images/terms/cardiac/right_atrium.webp",
         quizQuestions: [
           {
             question: "What does Right Atrium mean?",
@@ -273,7 +273,7 @@ export const TERMS = {
         ar: "الشريان الرئوي",
         definition: "The artery that carries oxygen-poor blood from the heart to the lungs.",
         example: "The pulmonary artery carries blood from the right ventricle to the lungs.",
-        image: "/images/terms/cardiac/pulmonary_artery.png",
+        image: "/images/terms/cardiac/pulmonary_artery.webp",
         quizQuestions: [
           {
             question: "What does Pulmonary Artery mean?",
@@ -305,7 +305,7 @@ export const TERMS = {
         ar: "العقدة الجيبية الأذينية",
         definition: "A small group of cells that starts the heartbeat.",
         example: "The sinoatrial node sets the heart's normal rhythm.",
-        image: "/images/terms/cardiac/sinoatrial_node.png",
+        image: "/images/terms/cardiac/sinoatrial_node.webp",
         quizQuestions: [
           {
             question: "What does Sinoatrial Node mean?",
