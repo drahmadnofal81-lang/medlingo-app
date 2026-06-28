@@ -220,6 +220,94 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
   );
 }
 
+const OPTION_KEYS = ["A", "B", "C", "D"];
+
+function getTermDefinition(term) {
+  return term.definition || term.example || term.ar;
+}
+
+function buildMcqOptionSet(correctValue, wrongValues) {
+  const uniqueWrongValues = wrongValues.filter((value, index, all) =>
+    value && value !== correctValue && all.indexOf(value) === index
+  );
+  const values = [correctValue, ...uniqueWrongValues].slice(0, 4).sort(() => Math.random() - 0.5);
+  const correctIndex = values.indexOf(correctValue);
+
+  const options = OPTION_KEYS.reduce((items, key, index) => {
+    items[key] = values[index] || correctValue;
+    return items;
+  }, {});
+
+  return {
+    options,
+    correctAnswer: OPTION_KEYS[correctIndex >= 0 ? correctIndex : 0],
+  };
+}
+
+function toOptionsList(options) {
+  return Object.entries(options).map(([key, value]) => ({ key, value }));
+}
+
+function buildStandardQuestion({ term, id, question, prompt, correctValue, wrongValues, explanation }) {
+  const { options, correctAnswer } = buildMcqOptionSet(correctValue, wrongValues);
+
+  return {
+    term,
+    id,
+    question,
+    prompt,
+    correctAnswer,
+    explanation,
+    optionsList: toOptionsList(options),
+  };
+}
+
+function prepareQuizQuestion(quizQuestion, term, index) {
+  return {
+    ...quizQuestion,
+    term,
+    id: `${term.en}-${index}`,
+    prompt: quizQuestion.prompt || term.en,
+    optionsList: Object.entries(quizQuestion.options).map(([key, value]) => ({ key, value })),
+  };
+}
+
+function generateStandardQuizQuestions(term, allTerms) {
+  const definition = getTermDefinition(term);
+  const otherTerms = allTerms.filter(other => other.en !== term.en);
+
+  return [
+    buildStandardQuestion({
+      term,
+      id: `${term.en}-definition`,
+      question: `What does ${term.en} mean?`,
+      prompt: term.en,
+      correctValue: definition,
+      wrongValues: otherTerms.map(getTermDefinition),
+      explanation: `${term.en}: ${definition}`,
+    }),
+    buildStandardQuestion({
+      term,
+      id: `${term.en}-arabic`,
+      question: "Which English term matches this Arabic translation?",
+      prompt: term.ar,
+      correctValue: term.en,
+      wrongValues: otherTerms.map(other => other.en),
+      explanation: `${term.ar} means ${term.en}.`,
+    }),
+  ];
+}
+
+function buildQuizQuestions(terms) {
+  return terms.flatMap(term => {
+    if (term.quizQuestions?.length) {
+      return term.quizQuestions.map((quizQuestion, index) => prepareQuizQuestion(quizQuestion, term, index));
+    }
+
+    return generateStandardQuizQuestions(term, terms);
+  });
+}
+
 // ── Quiz Component ───────────────────────────────────────────────────────────
 function Quiz({ terms, onFinish }) {
   const [qIndex, setQIndex] = useState(0);
@@ -228,35 +316,7 @@ function Quiz({ terms, onFinish }) {
   const [aiFeedback, setAiFeedback] = useState(null);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
-  // Build options: 1 correct + 3 random wrong
-  const buildOptions = (term, allTerms) => {
-    const others = allTerms.filter(t => t.en !== term.en);
-    const shuffled = [...others].sort(() => Math.random() - 0.5).slice(0, 3);
-    return [...shuffled, term].sort(() => Math.random() - 0.5);
-  };
-
-  const [questions] = useState(() => terms.flatMap(term => {
-    if (term.quizQuestions?.length) {
-      return term.quizQuestions.map((quizQuestion, index) => ({
-        ...quizQuestion,
-        term,
-        id: `${term.en}-${index}`,
-        prompt: quizQuestion.prompt || term.en,
-        optionsList: Object.entries(quizQuestion.options).map(([key, value]) => ({ key, value })),
-      }));
-    }
-
-    return [{
-      term,
-      id: term.en,
-      question: "ما معنى هذا المصطلح؟",
-      prompt: term.en,
-      optionsList: buildOptions(term, terms).map(opt => ({
-        value: opt.ar,
-        isCorrect: opt.en === term.en,
-      })),
-    }];
-  }));
+  const [questions] = useState(() => buildQuizQuestions(terms));
 
   const current = questions[qIndex];
   const currentTerm = current.term;
@@ -822,7 +882,7 @@ function modeButtonStyle(color) {
 }
 
 function getQuizQuestionCount(terms) {
-  return terms.reduce((total, term) => total + (term.quizQuestions?.length || 1), 0);
+  return terms.reduce((total, term) => total + (term.quizQuestions?.length || 2), 0);
 }
 
 function toImageFilename(term) {
