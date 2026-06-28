@@ -81,7 +81,7 @@ const SUBTABS = {
 
 
 // ── Flashcard Component ──────────────────────────────────────────────────────
-function FlashCard({ term, onKnow, onStudyMore }) {
+function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
   const [loading, setLoading] = useState(false);
   const [aiHint, setAiHint] = useState(null);
   const [imageError, setImageError] = useState(false);
@@ -199,20 +199,21 @@ function FlashCard({ term, onKnow, onStudyMore }) {
       )}
 
       {/* Action buttons */}
-      <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420 }}>
-        <button onClick={onStudyMore} style={{
+      <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420, direction: "ltr" }}>
+        <button onClick={onPrevious} disabled={!canPrevious} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
           background: "#fff3cd", border: "none", color: "#856404",
-          fontWeight: 700, fontSize: 15, cursor: "pointer",
+          fontWeight: 900, fontSize: 24, cursor: canPrevious ? "pointer" : "not-allowed",
+          opacity: canPrevious ? 1 : 0.45,
         }}>
-          🔄 مش عارفه
+          ←
         </button>
-        <button onClick={onKnow} style={{
+        <button onClick={onNext} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
           background: "#d1fae5", border: "none", color: "#065f46",
-          fontWeight: 700, fontSize: 15, cursor: "pointer",
+          fontWeight: 900, fontSize: 24, cursor: "pointer",
         }}>
-          ✅ عارفه!
+          →
         </button>
       </div>
     </div>
@@ -1006,6 +1007,7 @@ function App() {
   const [quizScore, setQuizScore] = useState(0);
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1047,6 +1049,17 @@ function App() {
     setView("mode");
   }
 
+  function openTermResult(result) {
+    const terms = TERMS[result.category][result.subtab];
+    setCategory(result.category);
+    setSubtab(result.subtab);
+    setQueue(terms);
+    setCardIndex(result.termIndex);
+    setKnownCount(0);
+    setSearchQuery("");
+    setView("flashcards");
+  }
+
   function startFlashcards() {
     setQueue(TERMS[category][subtab]);
     setCardIndex(0);
@@ -1080,6 +1093,14 @@ function App() {
     advanceCard(newQueue);
   }
 
+  function handlePreviousCard() {
+    setCardIndex(i => Math.max(0, i - 1));
+  }
+
+  function handleNextCard() {
+    advanceCard(queue);
+  }
+
   function handleQuizFinish(score) {
     setQuizScore(score);
     setXp(x => x + score * 10);
@@ -1093,6 +1114,23 @@ function App() {
   const currentSubtabLabel = currentSubtab ? `${currentSubtab.label} · ${currentSubtab.en}` : "";
   const activeTerms = category && subtab ? TERMS[category][subtab] : [];
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
+  const visibleCategories = CATEGORIES.filter(cat => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return `${cat.label} ${cat.en} ${cat.desc}`.toLowerCase().includes(q);
+  });
+  const termSearchResults = searchQuery.trim()
+    ? Object.entries(TERMS).flatMap(([catId, subtabs]) =>
+        Object.entries(subtabs).flatMap(([subId, terms]) =>
+          terms
+            .map((term, termIndex) => ({ term, termIndex, category: catId, subtab: subId }))
+            .filter(({ term }) =>
+              `${term.en} ${term.ar} ${term.definition || ""} ${term.example || ""}`.toLowerCase()
+                .includes(searchQuery.trim().toLowerCase())
+            )
+        )
+      ).slice(0, 12)
+    : [];
 
   if (view === "register") {
     return <RegisterPage onRegister={(u) => { setUser(u); setView("splash"); }} />;
@@ -1207,8 +1245,43 @@ function App() {
             <div style={{ fontSize: 15, color: "#555", marginBottom: 16, textAlign: "center" }}>
               اختر فئة لتبدأ التعلّم
             </div>
+            <div style={{ position: "relative", marginBottom: 14 }}>
+              <span style={{
+                position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
+                color: "#888", fontSize: 17, pointerEvents: "none",
+              }}>
+                🔍
+              </span>
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="ابحث عن مصطلح"
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  border: "1.5px solid rgba(42,157,143,0.25)",
+                  borderRadius: 14, padding: "12px 16px 12px 42px",
+                  background: "#fff", color: "#16213e",
+                  fontSize: 14, outline: "none",
+                  fontFamily: "inherit",
+                }}
+              />
+            </div>
+            {termSearchResults.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                {termSearchResults.map(({ term, category: catId, subtab: subId, termIndex }) => (
+                  <button key={`${catId}-${subId}-${term.en}`} onClick={() => openTermResult({ category: catId, subtab: subId, termIndex })} style={{
+                    background: "#fff", border: "1.5px solid rgba(42,157,143,0.25)",
+                    borderRadius: 14, padding: "12px 14px", cursor: "pointer",
+                    textAlign: "right", boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#16213e" }}>{term.en}</div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 3 }}>{term.ar}</div>
+                  </button>
+                ))}
+              </div>
+            )}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {CATEGORIES.map(cat => (
+              {visibleCategories.map(cat => (
                 <button key={cat.id} onClick={() => openCategory(cat.id)} style={{
                   background: "#fff", border: `2px solid ${cat.color}33`,
                   borderRadius: 18, padding: "20px 12px", cursor: "pointer",
@@ -1271,8 +1344,10 @@ function App() {
             <div style={{ marginTop: 16 }}>
               <FlashCard
                 term={queue[cardIndex]}
-                onKnow={handleKnow}
-                onStudyMore={handleStudyMore}
+                onPrevious={handlePreviousCard}
+                onNext={handleNextCard}
+                canPrevious={cardIndex > 0}
+                canNext={cardIndex + 1 < queue.length}
               />
             </div>
           </>
