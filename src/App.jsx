@@ -1534,6 +1534,7 @@ function ResultCard({ emoji, title, lines, onContinue }) {
 }
 
 // ── Main App ─────────────────────────────────────────────────────────────────
+const ACADEMY_LOGO = "/images/best-academy-logo.jpeg";
 
 function App() {
   if (window.location.pathname === "/developer") {
@@ -1862,7 +1863,7 @@ function App() {
 
         {/* Powered by */}
         <div style={{
-          position: "absolute", bottom: 32,
+          position: "absolute", bottom: "calc(48px + env(safe-area-inset-bottom, 0px))",
           display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
         }}>
           <div style={{ fontSize: 11, color: PALETTE.secondary, letterSpacing: 1, textTransform: "uppercase", fontFamily: FONT_EN }}>
@@ -1874,15 +1875,7 @@ function App() {
             border: `1px solid ${PALETTE.border}`,
             borderRadius: 20, padding: "6px 14px",
           }}>
-            <div style={{
-              width: 26, height: 26, borderRadius: 8,
-              background: `linear-gradient(135deg,${PALETTE.primary},${PALETTE.blue})`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 14,
-              lineHeight: 1,
-            }}>
-              🩺
-            </div>
+            <img src={ACADEMY_LOGO} alt="The Best Academy" style={{ width: 26, height: 26, borderRadius: "50%", objectFit: "cover", background: "#fff" }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: PALETTE.success, letterSpacing: 0, fontFamily: FONT_EN }}>
               The Best Academy
             </span>
