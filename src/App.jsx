@@ -207,6 +207,9 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
   const [aiHint, setAiHint] = useState(null);
   const [imageError, setImageError] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageZoom, setImageZoom] = useState(1);
+  const [touchDistance, setTouchDistance] = useState(null);
   const imageSrc = typeof term.image === "string" ? term.image.trim() : "";
   const imageBase = imageSrc.replace(/\.[^/.]+$/, "");
   const imageCandidates = imageSrc
@@ -215,14 +218,40 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
   const currentImageSrc = imageCandidates[imageIndex] || "";
   const definitionText = getDefinitionText(term);
   const definitionArText = getArabicDefinitionText(term);
-  const exampleText = term.example || "";
-  const showExample = exampleText.trim() && exampleText.trim() !== definitionText.trim();
 
   useEffect(() => {
     setAiHint(null);
     setImageError(false);
     setImageIndex(0);
+    setImageModalOpen(false);
+    setImageZoom(1);
   }, [term]);
+
+  useEffect(() => {
+    if (!imageModalOpen) return;
+
+    function handleEscape(event) {
+      if (event.key === "Escape") setImageModalOpen(false);
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [imageModalOpen]);
+
+  function changeImageZoom(nextZoom) {
+    setImageZoom(Math.min(4, Math.max(1, nextZoom)));
+  }
+
+  function getTouchDistance(touches) {
+    const [first, second] = touches;
+    return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+  }
+
+  function openImageModal() {
+    setImageZoom(1);
+    setTouchDistance(null);
+    setImageModalOpen(true);
+  }
 
   async function getAiHint() {
     setLoading(true);
@@ -269,16 +298,33 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
           overflow: "hidden",
         }}>
           {currentImageSrc && !imageError ? (
-            <img
-              key={currentImageSrc}
-              src={currentImageSrc}
-              alt={term.en}
-              onError={() => {
-                if (imageIndex + 1 < imageCandidates.length) setImageIndex(i => i + 1);
-                else setImageError(true);
+            <button
+              type="button"
+              onClick={openImageModal}
+              aria-label={`Open ${term.en} image`}
+              style={{
+                border: "none",
+                background: "transparent",
+                padding: 0,
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "zoom-in",
               }}
-              style={{ maxWidth: "100%", height: "auto", maxHeight: "100%", objectFit: "contain", display: "block" }}
-            />
+            >
+              <img
+                key={currentImageSrc}
+                src={currentImageSrc}
+                alt={term.en}
+                onError={() => {
+                  if (imageIndex + 1 < imageCandidates.length) setImageIndex(i => i + 1);
+                  else setImageError(true);
+                }}
+                style={{ maxWidth: "100%", height: "auto", maxHeight: "100%", objectFit: "contain", display: "block" }}
+              />
+            </button>
           ) : (
             "🩺"
           )}
@@ -301,11 +347,6 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
           {definitionArText}
         </div>
-        {showExample && (
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, marginTop: 10 }}>
-            {exampleText}
-          </div>
-        )}
 
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
           background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
@@ -349,6 +390,131 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
           →
         </button>
       </div>
+      {imageModalOpen && currentImageSrc && !imageError && (
+        <div
+          onClick={() => setImageModalOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            background: "rgba(0,0,0,0.78)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setImageModalOpen(false)}
+            aria-label="Close image"
+            style={{
+              position: "absolute",
+              top: 18,
+              right: 18,
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              border: "none",
+              background: "#fff",
+              color: "#16213e",
+              fontSize: 28,
+              lineHeight: "42px",
+              cursor: "pointer",
+              fontWeight: 700,
+            }}
+          >
+            ×
+          </button>
+
+          <div
+            onClick={(event) => event.stopPropagation()}
+            onWheel={(event) => {
+              event.preventDefault();
+              changeImageZoom(imageZoom + (event.deltaY < 0 ? 0.15 : -0.15));
+            }}
+            onTouchStart={(event) => {
+              if (event.touches.length === 2) setTouchDistance(getTouchDistance(event.touches));
+            }}
+            onTouchMove={(event) => {
+              if (event.touches.length !== 2 || !touchDistance) return;
+              const nextDistance = getTouchDistance(event.touches);
+              changeImageZoom(imageZoom + (nextDistance - touchDistance) / 220);
+              setTouchDistance(nextDistance);
+            }}
+            onTouchEnd={() => setTouchDistance(null)}
+            style={{
+              maxWidth: "92vw",
+              maxHeight: "86vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            <div style={{
+              maxWidth: "92vw",
+              maxHeight: "76vh",
+              overflow: "auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 18,
+              background: "#fff",
+              padding: 12,
+            }}>
+              <img
+                src={currentImageSrc}
+                alt={term.en}
+                style={{
+                  maxWidth: "86vw",
+                  maxHeight: "70vh",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  transform: `scale(${imageZoom})`,
+                  transformOrigin: "center center",
+                  transition: "transform 120ms ease",
+                  display: "block",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => changeImageZoom(imageZoom - 0.25)}
+                style={{
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "10px 16px",
+                  background: "#fff3cd",
+                  color: "#856404",
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => changeImageZoom(imageZoom + 0.25)}
+                style={{
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "10px 16px",
+                  background: "#d1fae5",
+                  color: "#065f46",
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -358,8 +524,6 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
 
   const definitionText = term.definition || term.example || "";
   const definitionArText = getArabicDefinitionText(term);
-  const exampleText = term.example || "";
-  const showExample = exampleText.trim() && exampleText.trim() !== definitionText.trim();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
@@ -385,11 +549,6 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
         <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
           {definitionArText}
         </div>
-        {showExample && (
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, marginTop: 10 }}>
-            {exampleText}
-          </div>
-        )}
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
           background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
       </div>

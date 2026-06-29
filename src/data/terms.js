@@ -608,8 +608,6 @@ export const TERMS = {
       },
     ],
     cardiac: [
-      { en: "Depolarization", ar: "إزالة الاستقطاب", definition: "The process, molecule, structure, or condition that occurs when sodium ions rush into the cell.", example: "Depolarization occurs when sodium ions rush into the cell." },
-      { en: "Repolarization", ar: "إعادة الاستقطاب", definition: "The process, molecule, structure, or condition that restores the resting membrane potential.", example: "Repolarization restores the resting membrane potential." },
       { en: "Cardiac Output", ar: "الناتج القلبي", definition: "The process, molecule, structure, or condition that equals heart rate times stroke volume.", example: "Cardiac output equals heart rate times stroke volume." },
       { en: "Stroke Volume", ar: "حجم الضربة", definition: "The blood ejected per heartbeat.", example: "Stroke volume is the blood ejected per heartbeat." },
       { en: "Tachycardia", ar: "تسارع ضربات القلب", definition: "A heart rate above 100 bpm.", example: "Tachycardia is a heart rate above 100 bpm." },
@@ -617,6 +615,30 @@ export const TERMS = {
       { en: "Preload", ar: "الحمل المسبق", definition: "The ventricular filling pressure before contraction.", example: "Preload is the ventricular filling pressure before contraction." },
       { en: "Afterload", ar: "الحمل اللاحق", definition: "The resistance the heart pumps against.", example: "Afterload is the resistance the heart pumps against." },
       { en: "Frank-Starling Law", ar: "قانون فرانك-ستارلينج", definition: "Greater stretch of cardiac muscle leads to stronger contraction.", example: "Greater stretch of cardiac muscle leads to stronger contraction." },
+      {
+        en: "Cardiac Cycle",
+        ar: "الدورة القلبية",
+        definition: "The sequence of heart filling and pumping during one heartbeat.",
+        definitionAr: "تسلسل امتلاء القلب وضخه خلال نبضة قلب واحدة.",
+      },
+      {
+        en: "Pacemaker",
+        ar: "منظم ضربات القلب",
+        definition: "A natural or artificial source that sets the rhythm of the heartbeat.",
+        definitionAr: "مصدر طبيعي أو صناعي يحدد إيقاع ضربات القلب.",
+      },
+      {
+        en: "Inotropic",
+        ar: "مؤثر في قوة الانقباض",
+        definition: "A factor that changes the strength of heart muscle contraction.",
+        definitionAr: "عامل يغير قوة انقباض عضلة القلب.",
+      },
+      {
+        en: "Chronotropic",
+        ar: "مؤثر في معدل النبض",
+        definition: "A factor that changes the rate of the heartbeat.",
+        definitionAr: "عامل يغير معدل ضربات القلب.",
+      },
     ],
     renal: [
       { en: "Glomerular Filtration", ar: "الترشيح الكبيبي", definition: "The first step of urine formation.", example: "Glomerular filtration is the first step of urine formation." },
@@ -632,6 +654,20 @@ export const TERMS = {
     ],
     neuro: [
       { en: "Action Potential", ar: "جهد الفعل", definition: "Changes in membrane potential after stimulation.", example: "An action potential carries a signal along a neuron." },
+      {
+        en: "Depolarization",
+        ar: "إزالة الاستقطاب",
+        definition: "A change that makes the inside of a cell less negative.",
+        definitionAr: "تغير يجعل داخل الخلية أقل سلبية.",
+        example: "Depolarization helps start an action potential in a neuron.",
+      },
+      {
+        en: "Repolarization",
+        ar: "إعادة الاستقطاب",
+        definition: "A change that returns the cell membrane toward its resting state.",
+        definitionAr: "تغير يعيد غشاء الخلية نحو حالة الراحة.",
+        example: "Repolarization helps the neuron recover after an action potential.",
+      },
       { en: "Resting Potential", ar: "جهد الراحة", definition: "The resting membrane potential is about -70 mV.", example: "The resting membrane potential is about -70 mV." },
       { en: "Synaptic Transmission", ar: "النقل التشابكي", definition: "The process, molecule, structure, or condition that passes signals between neurons.", example: "Synaptic transmission passes signals between neurons." },
       { en: "Neurotransmitter", ar: "الناقل العصبي", definition: "Acetylcholine is a key neurotransmitter at synapses.", example: "Acetylcholine is a key neurotransmitter at synapses." },
