@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TERMS } from "./data/terms";
 
 function getDefinitionText(term) {
@@ -6,15 +6,30 @@ function getDefinitionText(term) {
 }
 
 function playSoundEffect(fileName, muted = false) {
-  if (muted || typeof Audio === "undefined") return;
+  if (muted || typeof Audio === "undefined") return Promise.resolve(false);
 
   try {
     const audio = new Audio(`/sounds/${fileName}`);
     audio.volume = 0.25;
     const playPromise = audio.play();
-    if (playPromise?.catch) playPromise.catch(() => {});
+    if (playPromise?.then) return playPromise.then(() => true).catch(() => false);
+    return Promise.resolve(true);
   } catch {
     // Sound effects are optional; missing files should never interrupt learning.
+    return Promise.resolve(false);
+  }
+}
+
+function playPreparedSound(audio, muted = false) {
+  if (muted || !audio) return Promise.resolve(false);
+
+  try {
+    audio.currentTime = 0;
+    const playPromise = audio.play();
+    if (playPromise?.then) return playPromise.then(() => true).catch(() => false);
+    return Promise.resolve(true);
+  } catch {
+    return Promise.resolve(false);
   }
 }
 
@@ -840,7 +855,7 @@ function Quiz({ terms, onFinish, onSound }) {
       </div>
 
       {/* Options */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%", maxWidth: 420 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%", maxWidth: 420, direction: "ltr" }}>
         {current.optionsList.map((opt, i) => {
           const isRight = opt.isCorrect ?? opt.key === current.correctAnswer;
           const isPicked = selected === opt;
@@ -1528,6 +1543,9 @@ function App() {
       return false;
     }
   });
+  const appHistoryRef = useRef([]);
+  const welcomeAudioRef = useRef(null);
+  const welcomeAutoplayTriedRef = useRef(false);
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1560,20 +1578,68 @@ function App() {
   }, [view]);
 
   useEffect(() => {
+    if (welcomePlayed || typeof Audio === "undefined") return;
+
+    try {
+      const audio = new Audio("/sounds/welcome.mp3");
+      audio.preload = "auto";
+      audio.volume = 0.25;
+      audio.load();
+      welcomeAudioRef.current = audio;
+    } catch {
+      welcomeAudioRef.current = null;
+    }
+  }, [welcomePlayed]);
+
+  useEffect(() => {
     try {
       localStorage.setItem("medlingo_sound_muted", soundMuted ? "1" : "0");
     } catch {}
   }, [soundMuted]);
 
+  useEffect(() => {
+    function handleBrowserBack() {
+      const previousState = appHistoryRef.current.pop();
+      if (!previousState) return;
+      restoreAppState(previousState);
+    }
+
+    window.addEventListener("popstate", handleBrowserBack);
+    return () => window.removeEventListener("popstate", handleBrowserBack);
+  }, []);
+
+  useEffect(() => {
+    if (welcomePlayed) return;
+
+    function handleFirstInteraction() {
+      playWelcomeOnce();
+    }
+
+    window.addEventListener("pointerdown", handleFirstInteraction, { once: true, capture: true });
+    window.addEventListener("keydown", handleFirstInteraction, { once: true, capture: true });
+    return () => {
+      window.removeEventListener("pointerdown", handleFirstInteraction, { capture: true });
+      window.removeEventListener("keydown", handleFirstInteraction, { capture: true });
+    };
+  }, [welcomePlayed, soundMuted]);
+
+  useEffect(() => {
+    if (welcomePlayed || welcomeAutoplayTriedRef.current) return;
+    if (view !== "splash" && view !== "home") return;
+
+    welcomeAutoplayTriedRef.current = true;
+    playWelcomeOnce({ markOnlyOnSuccess: true });
+  }, [view, welcomePlayed, soundMuted]);
+
   function openCategory(catId) {
     setCategory(catId);
-    setView("subtabs");
+    navigateView("subtabs");
   }
 
   function openSubtab(subId) {
     setSubtab(subId);
     setCardIndex(0);
-    setView("mode");
+    navigateView("mode");
   }
 
   function openTermResult(result) {
@@ -1584,31 +1650,66 @@ function App() {
     setCardIndex(result.termIndex);
     setKnownCount(0);
     setSearchQuery("");
-    setView(INTERACTIVE_CATEGORIES.has(result.category) ? "flashcards" : "mode");
+    navigateView(INTERACTIVE_CATEGORIES.has(result.category) ? "flashcards" : "mode");
   }
 
   function startFlashcards() {
     setQueue(TERMS[category][subtab]);
     setCardIndex(0);
     setKnownCount(0);
-    setView("flashcards");
+    navigateView("flashcards");
   }
 
   function startQuiz() {
-    setView("quiz");
+    navigateView("quiz");
   }
 
   function playAppSound(fileName) {
     playSoundEffect(fileName, soundMuted);
   }
 
-  function playWelcomeOnce() {
-    if (welcomePlayed) return;
+  function markWelcomePlayed() {
     setWelcomePlayed(true);
     try {
       sessionStorage.setItem("medlingo_welcome_played", "1");
     } catch {}
-    playSoundEffect("welcome.mp3", soundMuted);
+  }
+
+  async function playWelcomeOnce({ markOnlyOnSuccess = false } = {}) {
+    if (welcomePlayed) return;
+    if (soundMuted) {
+      markWelcomePlayed();
+      return;
+    }
+
+    const played = welcomeAudioRef.current
+      ? await playPreparedSound(welcomeAudioRef.current, soundMuted)
+      : await playSoundEffect("welcome.mp3", soundMuted);
+
+    if (played || !markOnlyOnSuccess) markWelcomePlayed();
+  }
+
+  function getAppSnapshot() {
+    return { view, category, subtab, queue, cardIndex, knownCount, quizScore };
+  }
+
+  function restoreAppState(snapshot) {
+    setCategory(snapshot.category);
+    setSubtab(snapshot.subtab);
+    setQueue(snapshot.queue || []);
+    setCardIndex(snapshot.cardIndex || 0);
+    setKnownCount(snapshot.knownCount || 0);
+    setQuizScore(snapshot.quizScore || 0);
+    setView(snapshot.view);
+  }
+
+  function navigateView(nextView) {
+    if (nextView === view) return;
+    appHistoryRef.current.push(getAppSnapshot());
+    try {
+      window.history.pushState({ medlingo: true }, "", window.location.href);
+    } catch {}
+    setView(nextView);
   }
 
   function advanceCard(q) {
