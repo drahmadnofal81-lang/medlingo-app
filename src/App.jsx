@@ -222,13 +222,7 @@ const SUBTABS = {
   organs: [
     { id: "main", label: "🫁 أعضاء الجسم", en: "Body Organs" },
   ],
-  pharmacology: [
-    { id: "analgesics",    label: "💊 مسكنات",        en: "Analgesics" },
-    { id: "antibiotics",   label: "🦠 مضادات حيوية", en: "Antibiotics" },
-    { id: "cardiovascular",label: "🫀 قلبية وعائية",  en: "Cardiovascular" },
-    { id: "cns_drugs",     label: "🧠 جهاز عصبي",    en: "CNS Drugs" },
-    { id: "hormonal",      label: "⚗️ هرمونية",       en: "Hormonal" },
-  ],
+  pharmacology: [],
   pathology: [
     { id: "inflammation",  label: "🔥 الالتهاب",      en: "Inflammation" },
     { id: "neoplasia",     label: "🔬 الأورام",        en: "Neoplasia" },
@@ -237,6 +231,24 @@ const SUBTABS = {
     { id: "genetic",       label: "🧬 وراثية",         en: "Genetic" },
   ],
 };
+
+const DIRECT_CATEGORY_SUBTAB = "main";
+
+function isDirectCategory(categoryId) {
+  return Array.isArray(TERMS[categoryId]);
+}
+
+function getTermGroups(categoryId) {
+  const categoryTerms = TERMS[categoryId];
+  if (Array.isArray(categoryTerms)) return [[DIRECT_CATEGORY_SUBTAB, categoryTerms]];
+  return Object.entries(categoryTerms || {});
+}
+
+function getTermsForSubtab(categoryId, subtabId) {
+  const categoryTerms = TERMS[categoryId];
+  if (Array.isArray(categoryTerms)) return categoryTerms;
+  return categoryTerms?.[subtabId] || [];
+}
 
 
 // ── Flashcard Component ──────────────────────────────────────────────────────
@@ -1649,6 +1661,13 @@ function App() {
 
   function openCategory(catId) {
     setCategory(catId);
+    setCardIndex(0);
+    setKnownCount(0);
+    if (isDirectCategory(catId)) {
+      setSubtab(DIRECT_CATEGORY_SUBTAB);
+      navigateView("mode");
+      return;
+    }
     navigateView("subtabs");
   }
 
@@ -1659,7 +1678,7 @@ function App() {
   }
 
   function openTermResult(result) {
-    const terms = TERMS[result.category][result.subtab];
+    const terms = getTermsForSubtab(result.category, result.subtab);
     setCategory(result.category);
     setSubtab(result.subtab);
     setQueue(terms);
@@ -1670,7 +1689,7 @@ function App() {
   }
 
   function startFlashcards() {
-    setQueue(TERMS[category][subtab]);
+    setQueue(getTermsForSubtab(category, subtab));
     setCardIndex(0);
     setKnownCount(0);
     navigateView("flashcards");
@@ -1777,8 +1796,10 @@ function App() {
   const currentCategory = CATEGORIES.find(c => c.id === category);
   const subtabList = category ? SUBTABS[category] : [];
   const currentSubtab = subtabList.find(s => s.id === subtab);
-  const currentSubtabLabel = currentSubtab ? `${currentSubtab.label} · ${currentSubtab.en}` : "";
-  const activeTerms = category && subtab ? TERMS[category][subtab] : [];
+  const currentSubtabLabel = isDirectCategory(category)
+    ? `${currentCategory?.label || ""} · ${currentCategory?.en || ""}`
+    : currentSubtab ? `${currentSubtab.label} · ${currentSubtab.en}` : "";
+  const activeTerms = category && subtab ? getTermsForSubtab(category, subtab) : [];
   const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
   const visibleCategories = CATEGORIES.filter(cat => {
@@ -1787,8 +1808,8 @@ function App() {
     return `${cat.label} ${cat.en} ${cat.desc}`.toLowerCase().includes(q);
   });
   const termSearchResults = searchQuery.trim()
-    ? Object.entries(TERMS).flatMap(([catId, subtabs]) =>
-        Object.entries(subtabs).flatMap(([subId, terms]) =>
+    ? Object.keys(TERMS).flatMap(catId =>
+        getTermGroups(catId).flatMap(([subId, terms]) =>
           terms
             .map((term, termIndex) => ({ term, termIndex, category: catId, subtab: subId }))
             .filter(({ term }) =>
@@ -2011,7 +2032,7 @@ function App() {
 
         {view === "mode" && currentCategory && (
           <>
-            <BackBar onBack={() => setView("subtabs")} title={currentSubtabLabel} />
+            <BackBar onBack={() => setView(isDirectCategory(category) ? "home" : "subtabs")} title={currentSubtabLabel} />
             {isInteractiveMode ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 20 }}>
                 <button onClick={startFlashcards} style={modeButtonStyle(currentCategory.color)}>
