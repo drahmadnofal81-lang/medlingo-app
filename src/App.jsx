@@ -4,7 +4,7 @@ import { TERMS } from "./data/terms";
 const FONT_EN = "'Inter', sans-serif";
 const FONT_AR = "'Cairo', sans-serif";
 const PALETTE = {
-  appBg: "#F8FAFC",
+  appBg: "#EFF6FF",
   card: "#FFFFFF",
   primary: "#22C55E",
   success: "#16A34A",
@@ -12,7 +12,7 @@ const PALETTE = {
   error: "#EF4444",
   text: "#1F2937",
   secondary: "#6B7280",
-  border: "#E5E7EB",
+  border: "#D6E4F0",
 };
 
 function containsArabic(text = "") {
@@ -339,7 +339,7 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         {/* Image placeholder — replace with real image later */}
         <div style={{
           width: "100%", height: 160, borderRadius: 16, marginBottom: 20,
-          background: "#F8FAFC",
+          background: PALETTE.appBg,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 64, border: `1.5px dashed ${PALETTE.border}`,
           overflow: "hidden",
