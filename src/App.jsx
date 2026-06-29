@@ -1,6 +1,128 @@
 import { useState, useEffect } from "react";
 import { TERMS } from "./data/terms";
 
+function getDefinitionText(term) {
+  return term.definition || term.example || "";
+}
+
+function getArabicDefinitionText(term) {
+  if (term.definitionAr) return term.definitionAr;
+
+  const definition = getDefinitionText(term);
+  const exactTranslations = {
+    "The thick muscle layer of the heart that contracts to pump blood.": "الطبقة العضلية السميكة في القلب التي تنقبض لضخ الدم.",
+    "A protective sac that surrounds the heart.": "كيس واقٍ يحيط بالقلب.",
+    "The thin inner lining of the heart chambers and valves.": "البطانة الداخلية الرقيقة لحجرات القلب والصمامات.",
+    "The main artery that carries oxygen-rich blood from the heart to the body.": "الشريان الرئيسي الذي ينقل الدم الغني بالأكسجين من القلب إلى الجسم.",
+    "The maintenance of a stable internal environment in the body.": "الحفاظ على بيئة داخلية مستقرة داخل الجسم.",
+    "The fluid found inside the body's cells.": "السائل الموجود داخل خلايا الجسم.",
+    "The fluid found outside cells, including plasma and interstitial fluid.": "السائل الموجود خارج الخلايا، ويشمل البلازما والسائل الخلالي.",
+    "The fluid inside blood vessels, mainly blood plasma.": "السائل الموجود داخل الأوعية الدموية، ومعظمه بلازما الدم.",
+    "The fluid that surrounds and bathes body cells.": "السائل الذي يحيط بخلايا الجسم ويغمرها.",
+    "The passive movement of particles from high concentration to low concentration.": "الحركة السلبية للجزيئات من تركيز عالٍ إلى تركيز منخفض.",
+    "The energy-requiring movement of substances across a membrane against a concentration gradient.": "حركة المواد عبر الغشاء بعكس تدرج التركيز مع الحاجة إلى طاقة.",
+    "Changes in membrane potential after stimulation.": "تغيرات في جهد الغشاء بعد التنبيه.",
+  };
+  if (exactTranslations[definition]) return exactTranslations[definition];
+
+  const replacements = [
+    ["The process, molecule, structure, or condition that", "عملية أو جزيء أو تركيب أو حالة"],
+    ["A body process or response that", "عملية أو استجابة جسمية"],
+    ["A body structure or process that", "تركيب أو عملية في الجسم"],
+    ["A cell, tissue feature, or structure that", "خلية أو خاصية نسيجية أو تركيب"],
+    ["A molecule or process that", "جزيء أو عملية"],
+    ["A medication that", "دواء"],
+    ["A disease process or condition that", "عملية مرضية أو حالة"],
+    ["oxygen-rich blood", "الدم الغني بالأكسجين"],
+    ["oxygen-poor blood", "الدم الفقير بالأكسجين"],
+    ["blood vessels", "الأوعية الدموية"],
+    ["blood cells", "خلايا الدم"],
+    ["red blood cells", "خلايا الدم الحمراء"],
+    ["white blood cells", "خلايا الدم البيضاء"],
+    ["heart muscle", "عضلة القلب"],
+    ["heart chambers", "حجرات القلب"],
+    ["cell membrane", "غشاء الخلية"],
+    ["cell membranes", "أغشية الخلايا"],
+    ["body tissues", "أنسجة الجسم"],
+    ["body cells", "خلايا الجسم"],
+    ["the body", "الجسم"],
+    ["the heart", "القلب"],
+    ["the lungs", "الرئتين"],
+    ["the brain", "الدماغ"],
+    ["the kidney", "الكلية"],
+    ["the liver", "الكبد"],
+    ["the stomach", "المعدة"],
+    ["the blood", "الدم"],
+    ["the cell", "الخلية"],
+    ["the membrane", "الغشاء"],
+    ["the enzyme", "الإنزيم"],
+    ["oxygen", "الأكسجين"],
+    ["nutrients", "المغذيات"],
+    ["hormones", "الهرمونات"],
+    ["waste products", "الفضلات"],
+    ["wastes", "الفضلات"],
+    ["water", "الماء"],
+    ["fluid", "سائل"],
+    ["fluids", "سوائل"],
+    ["cells", "الخلايا"],
+    ["proteins", "البروتينات"],
+    ["amino acids", "الأحماض الأمينية"],
+    ["glucose", "الجلوكوز"],
+    ["fatty acids", "الأحماض الدهنية"],
+    ["energy", "الطاقة"],
+    ["infection", "العدوى"],
+    ["bleeding", "النزيف"],
+    ["clot", "جلطة"],
+    ["clots", "جلطات"],
+    ["movement", "حركة"],
+    ["moves", "ينقل"],
+    ["carries", "ينقل"],
+    ["carry", "تنقل"],
+    ["transports", "ينقل"],
+    ["transport", "نقل"],
+    ["helps", "يساعد"],
+    ["help", "تساعد"],
+    ["forms", "يشكل"],
+    ["form", "تشكل"],
+    ["breaks down", "يكسر"],
+    ["builds", "يبني"],
+    ["produces", "ينتج"],
+    ["release", "إطلاق"],
+    ["released", "يُفرز"],
+    ["controls", "يتحكم في"],
+    ["regulates", "ينظم"],
+    ["maintains", "يحافظ على"],
+    ["protects", "يحمي"],
+    ["supports", "يدعم"],
+    ["stimulates", "يحفز"],
+    ["inhibits", "يثبط"],
+    ["increases", "يزيد"],
+    ["decreases", "يقلل"],
+    ["inside", "داخل"],
+    ["outside", "خارج"],
+    ["between", "بين"],
+    ["from", "من"],
+    ["to", "إلى"],
+    ["through", "عبر"],
+    ["with", "مع"],
+    ["and", "و"],
+    ["or", "أو"],
+    ["that", "الذي"],
+    ["a ", ""],
+    ["an ", ""],
+    ["the ", ""],
+  ];
+
+  let translated = definition;
+  replacements
+    .sort((a, b) => b[0].length - a[0].length)
+    .forEach(([english, arabic]) => {
+      translated = translated.replace(new RegExp(english.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), arabic);
+    });
+
+  return translated === definition ? `ترجمة التعريف: ${definition}` : translated;
+}
+
 // ── Main Categories ──────────────────────────────────────────────────────────
 const CATEGORIES = [
   { id: "organs",       label: "🫁 أعضاء الجسم", en: "Body Organs",   color: "#6B4226", desc: "أعضاء رئيسية" },
@@ -20,7 +142,7 @@ const SUBTABS = {
   anatomy: [
     { id: "cardiac",      label: "🫀 القلب", en: "Cardiac" },
     { id: "skeletal",     label: "🦴 العظام", en: "Skeletal" },
-    { id: "neuro",        label: "🧠 الجهاز العصبي", en: "Neuro" },
+    { id: "neuro",        label: "🧠 الجهاز العصبي", en: "Nervous System" },
     { id: "respiratory",  label: "🫁 الجهاز التنفسي", en: "Respiratory" },
     { id: "abdominal",    label: "🫃 البطن", en: "Abdominal" },
     { id: "muscle",        label: "💪 العضلات", en: "Muscle" },
@@ -91,6 +213,10 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
     ? [".webp", ".png", ".jpg", ".jpeg"].map(ext => `${imageBase}${ext}`)
     : [];
   const currentImageSrc = imageCandidates[imageIndex] || "";
+  const definitionText = getDefinitionText(term);
+  const definitionArText = getArabicDefinitionText(term);
+  const exampleText = term.example || "";
+  const showExample = exampleText.trim() && exampleText.trim() !== definitionText.trim();
 
   useEffect(() => {
     setAiHint(null);
@@ -168,10 +294,18 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
           {term.ar}
         </div>
 
-        {/* Example */}
+        {/* Definition */}
         <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92 }}>
-          {term.example}
+          {definitionText}
         </div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
+          {definitionArText}
+        </div>
+        {showExample && (
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, marginTop: 10 }}>
+            {exampleText}
+          </div>
+        )}
 
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
           background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
@@ -223,6 +357,7 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
   if (!term) return null;
 
   const definitionText = term.definition || term.example || "";
+  const definitionArText = getArabicDefinitionText(term);
   const exampleText = term.example || "";
   const showExample = exampleText.trim() && exampleText.trim() !== definitionText.trim();
 
@@ -246,6 +381,9 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
         </div>
         <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92 }}>
           {definitionText}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
+          {definitionArText}
         </div>
         {showExample && (
           <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, marginTop: 10 }}>
