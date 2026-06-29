@@ -1072,7 +1072,7 @@ const AVATARS = [
 
 
 // ── Registration Page ────────────────────────────────────────────────────────
-function RegisterPage({ onRegister }) {
+function RegisterPage({ onRegister, onFirstInteraction }) {
   const [form, setForm] = useState({ name: "", college: "", university: "", phone: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -1179,7 +1179,7 @@ function RegisterPage({ onRegister }) {
             <Field id="university" label="الجامعة"        labelEn="University"  placeholder="مثال: جامعة القاهرة" icon="🎓" />
             <Field id="phone"      label="رقم الهاتف"    labelEn="Phone Number" placeholder="+20 10XXXXXXXX" type="tel" icon="📱" />
 
-            <button onClick={handleSubmit} style={{
+            <button onClick={() => { onFirstInteraction?.(); handleSubmit(); }} style={{
               width:"100%", padding:"15px 0", borderRadius:16,
               background:`linear-gradient(90deg, ${GOLD}, #F4A261)`,
               border:"none", color: DARK, fontWeight:900, fontSize:17,
@@ -1514,7 +1514,20 @@ function App() {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [soundMuted, setSoundMuted] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(() => {
+    try {
+      return localStorage.getItem("medlingo_sound_muted") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [welcomePlayed, setWelcomePlayed] = useState(() => {
+    try {
+      return sessionStorage.getItem("medlingo_welcome_played") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1545,6 +1558,12 @@ function App() {
     const timer = setTimeout(() => setView("home"), 3500);
     return () => clearTimeout(timer);
   }, [view]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("medlingo_sound_muted", soundMuted ? "1" : "0");
+    } catch {}
+  }, [soundMuted]);
 
   function openCategory(catId) {
     setCategory(catId);
@@ -1581,6 +1600,15 @@ function App() {
 
   function playAppSound(fileName) {
     playSoundEffect(fileName, soundMuted);
+  }
+
+  function playWelcomeOnce() {
+    if (welcomePlayed) return;
+    setWelcomePlayed(true);
+    try {
+      sessionStorage.setItem("medlingo_welcome_played", "1");
+    } catch {}
+    playSoundEffect("welcome.mp3", soundMuted);
   }
 
   function advanceCard(q) {
@@ -1654,12 +1682,12 @@ function App() {
     : [];
 
   if (view === "register") {
-    return <RegisterPage onRegister={(u) => { setUser(u); setView("splash"); }} />;
+    return <RegisterPage onFirstInteraction={playWelcomeOnce} onRegister={(u) => { setUser(u); setView("splash"); }} />;
   }
 
   if (view === "splash") {
     return (
-      <div onClick={() => setView("home")} style={{
+      <div onClick={() => { playWelcomeOnce(); setView("home"); }} style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         background: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
@@ -1668,9 +1696,9 @@ function App() {
         padding: "72px 24px 120px", boxSizing: "border-box",
       }}>
         <style>{`
-          @keyframes medlingoPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.85; }
+          @keyframes medlingoLogoFade {
+            0% { opacity: 0; filter: blur(4px); }
+            100% { opacity: 1; filter: blur(0); }
           }
           @keyframes medlingoLoad {
             0% { width: 0%; }
@@ -1680,7 +1708,8 @@ function App() {
         <div style={{
           display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",
-          transform: "translateY(clamp(20px, 5vh, 44px))",
+          transform: "translateY(clamp(4px, 2vh, 18px))",
+          animation: "medlingoLogoFade 700ms ease-out both",
         }}>
         <div style={{
           width: 160, height: 160, borderRadius: "50%",
@@ -1688,11 +1717,16 @@ function App() {
           border: "4px solid #D4AF37",
           overflow: "hidden",
           display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 22,
+          marginBottom: 24,
           boxShadow: "0 0 0 8px rgba(212,175,55,0.18), 0 8px 32px rgba(0,0,0,0.4)",
-          animation: "medlingoPulse 1.8s ease-in-out infinite",
         }}>
-          <img src={LOGO_B64} alt="The Best Academy" style={{ width: "115%", height: "115%", objectFit: "cover" }} />
+          <img src={LOGO_B64} alt="The Best Academy" style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center center",
+            display: "block",
+          }} />
         </div>
         <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: 1 }}>MedLingo</div>
         <div dir="rtl" style={{ fontSize: 14, color: "#9fb4d4", marginTop: 8, textAlign: "center" }}>
@@ -1732,7 +1766,7 @@ function App() {
   }
 
   return (
-    <div dir="rtl" style={{
+    <div dir="rtl" onPointerDownCapture={playWelcomeOnce} style={{
       minHeight: "100vh",
       background: "linear-gradient(160deg, #e8f8f1 0%, #bdebd8 45%, #2A9D8F 100%)",
       fontFamily: "'Segoe UI', Tahoma, Arial, sans-serif",
