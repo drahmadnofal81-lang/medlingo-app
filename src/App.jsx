@@ -4,7 +4,7 @@ import { TERMS } from "./data/terms";
 const FONT_EN = "'Inter', sans-serif";
 const FONT_AR = "'Cairo', sans-serif";
 const PALETTE = {
-  appBg: "#EFF6FF",
+  appBg: "#DCEEFF",
   card: "#FFFFFF",
   primary: "#22C55E",
   success: "#16A34A",

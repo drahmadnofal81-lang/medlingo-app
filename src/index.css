@@ -13,7 +13,7 @@ html, body, #root {
 
 body {
   font-family: 'Cairo', Tahoma, Arial, sans-serif;
-  background: #EFF6FF;
+  background: #DCEEFF;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Prevent iOS text size adjustment */
