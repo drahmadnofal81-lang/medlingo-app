@@ -1534,8 +1534,6 @@ function ResultCard({ emoji, title, lines, onContinue }) {
 }
 
 // ── Main App ─────────────────────────────────────────────────────────────────
-// ── Best Academy Logo ────────────────────────────────────────────────────────
-const LOGO_B64 = "/images/best-academy-logo.jpeg";
 
 function App() {
   if (window.location.pathname === "/developer") {
@@ -1839,21 +1837,15 @@ function App() {
           animation: "medlingoLogoFade 700ms ease-out both",
         }}>
         <div style={{
-          width: 160, height: 160, borderRadius: "50%",
-          background: PALETTE.card,
-          border: `4px solid ${PALETTE.primary}`,
-          overflow: "hidden",
+          width: 96, height: 96, borderRadius: 24,
+          background: `linear-gradient(135deg,${PALETTE.primary},${PALETTE.blue})`,
           display: "flex", alignItems: "center", justifyContent: "center",
           marginBottom: 24,
           boxShadow: "0 0 0 8px rgba(34,197,94,0.12), 0 12px 30px rgba(31,41,55,0.12)",
+          fontSize: 48,
+          lineHeight: 1,
         }}>
-          <img src={LOGO_B64} alt="The Best Academy" style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center center",
-            display: "block",
-          }} />
+          🩺
         </div>
         <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: 0, fontFamily: FONT_EN }}>MedLingo</div>
         <div dir="rtl" style={{ fontSize: 14, color: PALETTE.secondary, marginTop: 8, textAlign: "center" }}>
@@ -1882,7 +1874,15 @@ function App() {
             border: `1px solid ${PALETTE.border}`,
             borderRadius: 20, padding: "6px 14px",
           }}>
-            <img src={LOGO_B64} alt="The Best Academy" style={{ width: 26, height: 26, borderRadius: "50%", objectFit: "cover", background: "#fff" }} />
+            <div style={{
+              width: 26, height: 26, borderRadius: 8,
+              background: `linear-gradient(135deg,${PALETTE.primary},${PALETTE.blue})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 14,
+              lineHeight: 1,
+            }}>
+              🩺
+            </div>
             <span style={{ fontSize: 13, fontWeight: 600, color: PALETTE.success, letterSpacing: 0, fontFamily: FONT_EN }}>
               The Best Academy
             </span>
