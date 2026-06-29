@@ -26,6 +26,8 @@ const SUBTABS = {
     { id: "muscle",        label: "💪 العضلات", en: "Muscle" },
   ],
   physiology: [
+    { id: "introduction", label: "📘 مقدمة", en: "Introduction" },
+    { id: "blood",        label: "🩸 الدم", en: "Blood" },
     { id: "cardiac",      label: "🫀 قلبي", en: "Cardiac" },
     { id: "renal",        label: "🫘 كلوي", en: "Renal" },
     { id: "neuro",        label: "🧠 عصبي", en: "Neuro" },

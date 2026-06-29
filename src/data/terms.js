@@ -397,6 +397,100 @@ export const TERMS = {
   },
 
   physiology: {
+    introduction: [
+      {
+        en: "Homeostasis",
+        ar: "الاتزان الداخلي",
+        definition: "The maintenance of a stable internal environment in the body.",
+        example: "Homeostasis keeps body temperature and blood glucose within normal limits.",
+      },
+      {
+        en: "Intracellular Fluid",
+        ar: "السائل داخل الخلايا",
+        definition: "The fluid found inside the body's cells.",
+        example: "Intracellular fluid contains potassium and many dissolved proteins.",
+      },
+      {
+        en: "Extracellular Fluid",
+        ar: "السائل خارج الخلايا",
+        definition: "The fluid found outside cells, including plasma and interstitial fluid.",
+        example: "Extracellular fluid helps transport nutrients and wastes around cells.",
+      },
+      {
+        en: "Intravascular Fluid",
+        ar: "السائل داخل الأوعية الدموية",
+        definition: "The fluid inside blood vessels, mainly blood plasma.",
+        example: "Intravascular fluid helps maintain blood pressure and circulation.",
+      },
+      {
+        en: "Interstitial Fluid",
+        ar: "السائل الخلالي",
+        definition: "The fluid that surrounds and bathes body cells.",
+        example: "Interstitial fluid allows exchange between blood and tissues.",
+      },
+      {
+        en: "Diffusion",
+        ar: "الانتشار",
+        definition: "The passive movement of particles from high concentration to low concentration.",
+        example: "Diffusion moves oxygen from the alveoli into the blood.",
+      },
+      {
+        en: "Active Transport",
+        ar: "النقل النشط",
+        definition: "The energy-requiring movement of substances across a membrane against a concentration gradient.",
+        example: "Active transport moves sodium and potassium across cell membranes.",
+      },
+    ],
+    blood: [
+      {
+        en: "Blood",
+        ar: "الدم",
+        definition: "A fluid tissue that carries oxygen, nutrients, hormones, and waste products through the body.",
+        example: "Blood transports oxygen from the lungs to the tissues.",
+      },
+      {
+        en: "Plasma",
+        ar: "البلازما",
+        definition: "The liquid part of blood that carries cells, proteins, nutrients, hormones, and wastes.",
+        example: "Plasma helps transport dissolved substances through the bloodstream.",
+      },
+      {
+        en: "Red Blood Cells",
+        ar: "خلايا الدم الحمراء",
+        definition: "Blood cells that carry oxygen using hemoglobin.",
+        example: "Red blood cells deliver oxygen to body tissues.",
+      },
+      {
+        en: "White Blood Cells",
+        ar: "خلايا الدم البيضاء",
+        definition: "Blood cells that help defend the body against infection.",
+        example: "White blood cells increase during many infections.",
+      },
+      {
+        en: "Platelets",
+        ar: "الصفائح الدموية",
+        definition: "Small blood cell fragments that help form clots and stop bleeding.",
+        example: "Platelets gather at a damaged blood vessel to begin clot formation.",
+      },
+      {
+        en: "Hemoglobin",
+        ar: "الهيموغلوبين",
+        definition: "An iron-containing protein in red blood cells that binds and carries oxygen.",
+        example: "Hemoglobin gives red blood cells their oxygen-carrying ability.",
+      },
+      {
+        en: "Hematocrit",
+        ar: "الهيماتوكريت",
+        definition: "The percentage of blood volume made up of red blood cells.",
+        example: "Hematocrit can decrease in anemia.",
+      },
+      {
+        en: "Coagulation",
+        ar: "التخثر",
+        definition: "The process that forms a blood clot to stop bleeding.",
+        example: "Coagulation helps seal a wound after a blood vessel is injured.",
+      },
+    ],
     cardiac: [
       { en: "Depolarization", ar: "إزالة الاستقطاب", definition: "The process, molecule, structure, or condition that occurs when sodium ions rush into the cell.", example: "Depolarization occurs when sodium ions rush into the cell." },
       { en: "Repolarization", ar: "إعادة الاستقطاب", definition: "The process, molecule, structure, or condition that restores the resting membrane potential.", example: "Repolarization restores the resting membrane potential." },
