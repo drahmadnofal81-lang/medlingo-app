@@ -176,7 +176,6 @@ const CATEGORIES = [
   { id: "physiology",   label: "⚡ فسيولوجيا",   en: "Physiology",   color: PALETTE.success, desc: "مرتّب بالموضوع" },
   { id: "biochemistry", label: "🧪 بيوكيمياء",   en: "Biochemistry", color: PALETTE.blue, desc: "جزيئات وتفاعلات" },
   { id: "histology",    label: "🔬 هيستولوجيا",  en: "Histology",    color: PALETTE.primary, desc: "أنسجة وخلايا" },
-  { id: "bodysystems",  label: "🏥 أنظمة الجسم", en: "Body Systems",  color: PALETTE.blue, desc: "٨ أنظمة رئيسية" },
   { id: "pharmacology", label: "💊 فارماكولوجي",  en: "Pharmacology",  color: PALETTE.success, desc: "أدوية وتأثيرات" },
   { id: "pathology",    label: "🔴 باثولوجي",     en: "Pathology",     color: PALETTE.error, desc: "أمراض وآليات" },
 ];
@@ -196,11 +195,14 @@ const SUBTABS = {
   physiology: [
     { id: "introduction", label: "📘 مقدمة", en: "Introduction" },
     { id: "blood",        label: "🩸 الدم", en: "Blood" },
-    { id: "cardiac",      label: "🫀 قلبي", en: "Cardiac" },
-    { id: "renal",        label: "🫘 كلوي", en: "Renal" },
-    { id: "neuro",        label: "🧠 عصبي", en: "Neuro" },
-    { id: "respiratory",  label: "🫁 تنفسي", en: "Respiratory" },
-    { id: "endocrine",    label: "⚗️ هرموني", en: "Endocrine" },
+    { id: "cardiovascular", label: "🫀 القلب والأوعية", en: "Cardiovascular System" },
+    { id: "renal",        label: "🫘 الجهاز البولي", en: "Urinary System" },
+    { id: "neuro",        label: "🧠 الجهاز العصبي", en: "Nervous System" },
+    { id: "respiratory",  label: "🫁 الجهاز التنفسي", en: "Respiratory System" },
+    { id: "endocrine",    label: "⚗️ جهاز الغدد الصماء", en: "Endocrine System" },
+    { id: "git",          label: "🫃 الجهاز الهضمي", en: "GI Tract" },
+    { id: "musculoskeletal", label: "🦴 العضلات والعظام", en: "Musculoskeletal" },
+    { id: "reproductive", label: "🔬 الجهاز التناسلي", en: "Reproductive" },
   ],
   biochemistry: [
     { id: "metabolism",   label: "🔋 استقلاب", en: "Metabolism" },
@@ -233,16 +235,6 @@ const SUBTABS = {
     { id: "cardiovascular",label: "🫀 قلبية وعائية",  en: "Cardiovascular" },
     { id: "infectious",    label: "🦠 معدية",          en: "Infectious" },
     { id: "genetic",       label: "🧬 وراثية",         en: "Genetic" },
-  ],
-  bodysystems: [
-    { id: "git",          label: "🫃 الجهاز الهضمي", en: "GI Tract" },
-    { id: "cardiovascular", label: "🫀 القلب والأوعية", en: "Cardiovascular" },
-    { id: "renal",        label: "🫘 الجهاز البولي", en: "Renal" },
-    { id: "cns",          label: "🧠 الجهاز العصبي", en: "CNS" },
-    { id: "respiratory",  label: "🫁 الجهاز التنفسي", en: "Respiratory" },
-    { id: "endocrine",    label: "⚗️ الغدد الصماء", en: "Endocrine" },
-    { id: "musculoskeletal", label: "🦴 العضلات والعظام", en: "Musculoskeletal" },
-    { id: "reproductive", label: "🔬 الجهاز التناسلي", en: "Reproductive" },
   ],
 };
 
