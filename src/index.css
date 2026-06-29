@@ -12,8 +12,8 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-  background: #f5f7fa;
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  background: #F8FAFC;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Prevent iOS text size adjustment */
@@ -43,7 +43,7 @@ input:-webkit-autofill:focus {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.3);
+  background: rgba(34, 197, 94, 0.28);
   border-radius: 2px;
 }
 

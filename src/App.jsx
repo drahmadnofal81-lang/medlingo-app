@@ -1,6 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { TERMS } from "./data/terms";
 
+const FONT_EN = "'Inter', sans-serif";
+const FONT_AR = "'Cairo', sans-serif";
+const PALETTE = {
+  appBg: "#F8FAFC",
+  card: "#FFFFFF",
+  primary: "#22C55E",
+  success: "#16A34A",
+  blue: "#3B82F6",
+  error: "#EF4444",
+  text: "#1F2937",
+  secondary: "#6B7280",
+  border: "#E5E7EB",
+};
+
+function containsArabic(text = "") {
+  return /[\u0600-\u06FF]/.test(text);
+}
+
 function getDefinitionText(term) {
   return term.definition || term.example || "";
 }
@@ -153,14 +171,14 @@ function getArabicDefinitionText(term) {
 
 // ── Main Categories ──────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: "organs",       label: "🫁 أعضاء الجسم", en: "Body Organs",   color: "#6B4226", desc: "أعضاء رئيسية" },
-  { id: "anatomy",      label: "🫀 تشريح",       en: "Anatomy",      color: "#E63946", desc: "مقسّم بالجهاز" },
-  { id: "physiology",   label: "⚡ فسيولوجيا",   en: "Physiology",   color: "#2A9D8F", desc: "مرتّب بالموضوع" },
-  { id: "biochemistry", label: "🧪 بيوكيمياء",   en: "Biochemistry", color: "#F4A261", desc: "جزيئات وتفاعلات" },
-  { id: "histology",    label: "🔬 هيستولوجيا",  en: "Histology",    color: "#7B2D8B", desc: "أنسجة وخلايا" },
-  { id: "bodysystems",  label: "🏥 أنظمة الجسم", en: "Body Systems",  color: "#1A6B9A", desc: "٨ أنظمة رئيسية" },
-  { id: "pharmacology", label: "💊 فارماكولوجي",  en: "Pharmacology",  color: "#5C4D91", desc: "أدوية وتأثيرات" },
-  { id: "pathology",    label: "🔴 باثولوجي",     en: "Pathology",     color: "#B22222", desc: "أمراض وآليات" },
+  { id: "organs",       label: "🫁 أعضاء الجسم", en: "Body Organs",   color: PALETTE.primary, desc: "أعضاء رئيسية" },
+  { id: "anatomy",      label: "🫀 تشريح",       en: "Anatomy",      color: PALETTE.error, desc: "مقسّم بالجهاز" },
+  { id: "physiology",   label: "⚡ فسيولوجيا",   en: "Physiology",   color: PALETTE.success, desc: "مرتّب بالموضوع" },
+  { id: "biochemistry", label: "🧪 بيوكيمياء",   en: "Biochemistry", color: PALETTE.blue, desc: "جزيئات وتفاعلات" },
+  { id: "histology",    label: "🔬 هيستولوجيا",  en: "Histology",    color: PALETTE.primary, desc: "أنسجة وخلايا" },
+  { id: "bodysystems",  label: "🏥 أنظمة الجسم", en: "Body Systems",  color: PALETTE.blue, desc: "٨ أنظمة رئيسية" },
+  { id: "pharmacology", label: "💊 فارماكولوجي",  en: "Pharmacology",  color: PALETTE.success, desc: "أدوية وتأثيرات" },
+  { id: "pathology",    label: "🔴 باثولوجي",     en: "Pathology",     color: PALETTE.error, desc: "أمراض وآليات" },
 ];
 
 const INTERACTIVE_CATEGORIES = new Set(["organs", "anatomy", "histology"]);
@@ -311,18 +329,19 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
       <div style={{
         width: "100%", maxWidth: 420,
         borderRadius: 24,
-        background: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
-        color: "#fff", display: "flex", flexDirection: "column",
+        background: PALETTE.card,
+        color: PALETTE.text, display: "flex", flexDirection: "column",
         alignItems: "center", padding: "24px 24px 20px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        border: `1px solid ${PALETTE.border}`,
+        boxShadow: "0 10px 30px rgba(31,41,55,0.08)",
         position: "relative", overflow: "hidden",
       }}>
         {/* Image placeholder — replace with real image later */}
         <div style={{
           width: "100%", height: 160, borderRadius: 16, marginBottom: 20,
-          background: "rgba(255,255,255,0.07)",
+          background: "#F8FAFC",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 64, border: "1.5px dashed rgba(255,255,255,0.15)",
+          fontSize: 64, border: `1.5px dashed ${PALETTE.border}`,
           overflow: "hidden",
         }}>
           {currentImageSrc && !imageError ? (
@@ -359,41 +378,41 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         </div>
 
         {/* English term — big, bold, yellow */}
-        <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: 1, marginBottom: 8, textAlign: "center", color: "#FFD700" }}>
+        <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, marginBottom: 8, textAlign: "center", color: PALETTE.text, fontFamily: FONT_EN }}>
           {term.en}
         </div>
 
         {/* Arabic translation — underneath */}
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#fbbf24", textAlign: "center", direction: "rtl", marginBottom: 10 }}>
+        <div style={{ fontSize: 20, fontWeight: 500, color: PALETTE.success, textAlign: "center", direction: "rtl", marginBottom: 10, fontFamily: FONT_AR }}>
           {term.ar}
         </div>
 
         {/* Definition */}
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92 }}>
+        <div style={{ fontSize: 13, fontWeight: 400, color: PALETTE.text, textAlign: "center", lineHeight: 1.7, opacity: 0.92, fontFamily: FONT_EN }}>
           {definitionText}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 400, color: PALETTE.secondary, textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8, fontFamily: FONT_AR }}>
           {definitionArText}
         </div>
 
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
-          background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
+          background: `linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})` }} />
       </div>
 
       {/* AI Hint */}
       {!aiHint ? (
         <button onClick={getAiHint} disabled={loading} style={{
-          background: "transparent", border: "1.5px solid #457B9D",
-          color: "#457B9D", borderRadius: 12, padding: "8px 20px",
+          background: "transparent", border: `1.5px solid ${PALETTE.blue}`,
+          color: PALETTE.blue, borderRadius: 12, padding: "8px 20px",
           cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
         }}>
           {loading ? "⏳ جاري التحميل..." : "✨ تلميح ذكي من AI"}
         </button>
       ) : (
         <div style={{
-          background: "#f0f7ff", border: "1px solid #c7dff0",
+          background: "#EFF6FF", border: `1px solid ${PALETTE.border}`,
           borderRadius: 14, padding: "14px 18px", maxWidth: 420,
-          fontSize: 14, color: "#1a3a5c", direction: "rtl", lineHeight: 1.8,
+          fontSize: 14, color: PALETTE.text, direction: "rtl", lineHeight: 1.8,
           whiteSpace: "pre-line",
         }}>
           🤖 {aiHint}
@@ -404,7 +423,7 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
       <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420, direction: "ltr" }}>
         <button onClick={onPrevious} disabled={!canPrevious} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
-          background: "#fff3cd", border: "none", color: "#856404",
+          background: "#F3F4F6", border: `1px solid ${PALETTE.border}`, color: PALETTE.text,
           fontWeight: 900, fontSize: 24, cursor: canPrevious ? "pointer" : "not-allowed",
           opacity: canPrevious ? 1 : 0.45,
         }}>
@@ -412,7 +431,7 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         </button>
         <button onClick={onNext} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
-          background: "#d1fae5", border: "none", color: "#065f46",
+          background: "#DCFCE7", border: `1px solid ${PALETTE.border}`, color: PALETTE.success,
           fontWeight: 900, fontSize: 24, cursor: "pointer",
         }}>
           →
@@ -445,7 +464,7 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
               borderRadius: 21,
               border: "none",
               background: "#fff",
-              color: "#16213e",
+              color: PALETTE.text,
               fontSize: 28,
               lineHeight: "42px",
               cursor: "pointer",
@@ -516,8 +535,8 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
                   border: "none",
                   borderRadius: 12,
                   padding: "10px 16px",
-                  background: "#fff3cd",
-                  color: "#856404",
+                  background: "#F3F4F6",
+                  color: PALETTE.text,
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -531,8 +550,8 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
                   border: "none",
                   borderRadius: 12,
                   padding: "10px 16px",
-                  background: "#d1fae5",
-                  color: "#065f46",
+                  background: "#DCFCE7",
+                  color: PALETTE.success,
                   fontWeight: 900,
                   cursor: "pointer",
                 }}
@@ -558,33 +577,34 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
       <div style={{
         width: "100%", maxWidth: 420,
         borderRadius: 24,
-        background: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
-        color: "#fff", display: "flex", flexDirection: "column",
+        background: PALETTE.card,
+        color: PALETTE.text, display: "flex", flexDirection: "column",
         alignItems: "center", padding: "24px 24px 20px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        border: `1px solid ${PALETTE.border}`,
+        boxShadow: "0 10px 30px rgba(31,41,55,0.08)",
         position: "relative", overflow: "hidden",
         boxSizing: "border-box",
       }}>
-        <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: 1, marginBottom: 8, textAlign: "center", color: "#FFD700", direction: "ltr" }}>
+        <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, marginBottom: 8, textAlign: "center", color: PALETTE.text, direction: "ltr", fontFamily: FONT_EN }}>
           {term.en}
         </div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#fbbf24", textAlign: "center", direction: "rtl", marginBottom: 10 }}>
+        <div style={{ fontSize: 20, fontWeight: 500, color: PALETTE.success, textAlign: "center", direction: "rtl", marginBottom: 10, fontFamily: FONT_AR }}>
           {term.ar}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92 }}>
+        <div style={{ fontSize: 13, fontWeight: 400, color: PALETTE.text, textAlign: "center", lineHeight: 1.7, opacity: 0.92, fontFamily: FONT_EN }}>
           {definitionText}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#FFD700", fontStyle: "italic", textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 400, color: PALETTE.secondary, textAlign: "center", lineHeight: 1.7, opacity: 0.92, direction: "rtl", marginTop: 8, fontFamily: FONT_AR }}>
           {definitionArText}
         </div>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
-          background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)" }} />
+          background: `linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})` }} />
       </div>
 
       <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420, direction: "ltr" }}>
         <button onClick={onPrevious} disabled={!canPrevious} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
-          background: "#fff3cd", border: "none", color: "#856404",
+          background: "#F3F4F6", border: `1px solid ${PALETTE.border}`, color: PALETTE.text,
           fontWeight: 900, fontSize: 24, cursor: canPrevious ? "pointer" : "not-allowed",
           opacity: canPrevious ? 1 : 0.45,
         }}>
@@ -592,7 +612,7 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
         </button>
         <button onClick={onNext} disabled={!canNext} style={{
           flex: 1, padding: "14px 0", borderRadius: 14,
-          background: "#d1fae5", border: "none", color: "#065f46",
+          background: "#DCFCE7", border: `1px solid ${PALETTE.border}`, color: PALETTE.success,
           fontWeight: 900, fontSize: 24, cursor: canNext ? "pointer" : "not-allowed",
           opacity: canNext ? 1 : 0.45,
         }}>
@@ -780,6 +800,7 @@ function Quiz({ terms, onFinish, onSound }) {
 
   const current = questions[qIndex];
   const currentTerm = current.term;
+  const promptFont = containsArabic(current.prompt) ? FONT_AR : FONT_EN;
 
   async function getAiFeedback(isCorrect, term, chosenAr) {
     if (current.explanation) {
@@ -834,24 +855,26 @@ function Quiz({ terms, onFinish, onSound }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "center" }}>
       {/* Progress */}
       <div style={{ width: "100%", maxWidth: 420 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#666", marginBottom: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: PALETTE.secondary, marginBottom: 6 }}>
           <span>سؤال {qIndex + 1} من {questions.length}</span>
           <span>✅ {score} صح</span>
         </div>
-        <div style={{ background: "#e9ecef", borderRadius: 99, height: 8 }}>
-          <div style={{ height: 8, borderRadius: 99, background: "linear-gradient(90deg,#2A9D8F,#457B9D)",
+        <div style={{ background: PALETTE.border, borderRadius: 99, height: 8 }}>
+          <div style={{ height: 8, borderRadius: 99, background: `linear-gradient(90deg,${PALETTE.primary},${PALETTE.blue})`,
             width: `${((qIndex) / questions.length) * 100}%`, transition: "width 0.4s" }} />
         </div>
       </div>
 
       {/* Question */}
       <div style={{
-        background: "linear-gradient(135deg,#0f3460,#16213e)",
-        color: "#fff", borderRadius: 20, padding: "28px 24px",
+        background: PALETTE.card,
+        color: PALETTE.text, borderRadius: 20, padding: "28px 24px",
         width: "100%", maxWidth: 420, textAlign: "center",
+        border: `1px solid ${PALETTE.border}`,
+        boxShadow: "0 8px 24px rgba(31,41,55,0.08)",
       }}>
-        <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 10 }}>{current.question}</div>
-        <div style={{ fontSize: 32, fontWeight: 900, color: "#FFD700" }}>{current.prompt}</div>
+        <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 10, fontFamily: FONT_EN }}>{current.question}</div>
+        <div style={{ fontSize: 32, fontWeight: 600, color: PALETTE.text, fontFamily: promptFont }}>{current.prompt}</div>
       </div>
 
       {/* Options */}
@@ -859,16 +882,16 @@ function Quiz({ terms, onFinish, onSound }) {
         {current.optionsList.map((opt, i) => {
           const isRight = opt.isCorrect ?? opt.key === current.correctAnswer;
           const isPicked = selected === opt;
-          let bg = "#fff", border = "2px solid #dee2e6", color = "#333";
+          let bg = PALETTE.card, border = `2px solid ${PALETTE.border}`, color = PALETTE.text;
           if (selected) {
-            if (isRight) { bg = "#d1fae5"; border = "2px solid #10b981"; color = "#065f46"; }
-            else if (isPicked) { bg = "#fee2e2"; border = "2px solid #ef4444"; color = "#991b1b"; }
+            if (isRight) { bg = "#DCFCE7"; border = `2px solid ${PALETTE.success}`; color = PALETTE.success; }
+            else if (isPicked) { bg = "#FEE2E2"; border = `2px solid ${PALETTE.error}`; color = "#991B1B"; }
           }
           return (
             <button key={i} onClick={() => handleSelect(opt)} style={{
               padding: "14px 10px", borderRadius: 14, background: bg, border,
-              color, fontWeight: 600, fontSize: 15, cursor: selected ? "default" : "pointer",
-              direction: "rtl", transition: "all 0.2s",
+              color, fontWeight: 500, fontSize: 15, cursor: selected ? "default" : "pointer",
+              direction: "ltr", transition: "all 0.2s", fontFamily: FONT_EN,
             }}>
               {opt.key ? `${opt.key}. ${opt.value}` : opt.value}
             </button>
@@ -879,11 +902,11 @@ function Quiz({ terms, onFinish, onSound }) {
       {/* AI Feedback */}
       {selected && (
         <div style={{
-          background: isCorrect ? "#f0fdf4" : "#fff5f5",
-          border: `1px solid ${isCorrect ? "#bbf7d0" : "#fecaca"}`,
+          background: isCorrect ? "#F0FDF4" : "#FEF2F2",
+          border: `1px solid ${isCorrect ? "#BBF7D0" : "#FECACA"}`,
           borderRadius: 14, padding: "14px 18px", width: "100%", maxWidth: 420,
           direction: "rtl", fontSize: 14, lineHeight: 1.8,
-          color: isCorrect ? "#14532d" : "#7f1d1d",
+          color: isCorrect ? PALETTE.success : "#7F1D1D",
         }}>
           <div style={{ fontWeight: 700, marginBottom: 4 }}>
             {isCorrect ? "🎉 ممتاز!" : "❌ إجابة خاطئة"}
@@ -894,7 +917,7 @@ function Quiz({ terms, onFinish, onSound }) {
 
       {selected && (
         <button onClick={next} style={{
-          background: "linear-gradient(90deg,#2A9D8F,#457B9D)",
+          background: `linear-gradient(90deg,${PALETTE.primary},${PALETTE.blue})`,
           color: "#fff", border: "none", borderRadius: 14,
           padding: "14px 40px", fontWeight: 700, fontSize: 16,
           cursor: "pointer", width: "100%", maxWidth: 420,
@@ -1092,8 +1115,8 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  const GOLD = "#D4AF37";
-  const DARK = "#16213e";
+  const GOLD = PALETTE.primary;
+  const DARK = PALETTE.text;
 
   function validate() {
     const e = {};
@@ -1117,7 +1140,7 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
     <div style={{ marginBottom: 18 }}>
       <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
         <span style={{ fontSize:13, color: GOLD, fontWeight:700 }}>{icon} {label}</span>
-        <span style={{ fontSize:11, color:"#9fb4d4" }}>{labelEn}</span>
+        <span style={{ fontSize:11, color:"#9fb4d4", fontFamily: FONT_EN }}>{labelEn}</span>
       </div>
       <input
         type={type}
@@ -1128,14 +1151,14 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
         style={{
           width:"100%", boxSizing:"border-box",
           padding:"13px 16px", borderRadius:14,
-          border: errors[id] ? "2px solid #E63946" : "1.5px solid rgba(212,175,55,0.35)",
-          background:"rgba(255,255,255,0.06)", color:"#fff",
+          border: errors[id] ? `2px solid ${PALETTE.error}` : `1.5px solid ${PALETTE.border}`,
+          background: PALETTE.card, color: PALETTE.text,
           fontSize:15, outline:"none",
           fontFamily:"inherit",
         }}
       />
       {errors[id] && (
-        <div style={{ fontSize:12, color:"#E63946", marginTop:4, textAlign:"right" }}>
+        <div style={{ fontSize:12, color: PALETTE.error, marginTop:4, textAlign:"right" }}>
           ⚠ {errors[id]}
         </div>
       )}
@@ -1146,13 +1169,13 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
     <div style={{
       minHeight:"100vh", display:"flex", flexDirection:"column",
       alignItems:"center", justifyContent:"center",
-      background:"linear-gradient(160deg, #0f3460 0%, #16213e 60%, #0a1628 100%)",
-      fontFamily:"'Segoe UI', Tahoma, Arial, sans-serif",
+      background: PALETTE.appBg,
+      fontFamily: FONT_AR,
       padding:"24px 20px",
     }}>
       <style>{`
-        input::placeholder { color: rgba(159,180,212,0.5); }
-        input:focus { border-color: #D4AF37 !important; background: rgba(255,255,255,0.1) !important; }
+        input::placeholder { color: #9CA3AF; }
+        input:focus { border-color: ${PALETTE.primary} !important; background: #FFFFFF !important; }
         @keyframes regFadeIn { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
         @keyframes checkPop { 0%{transform:scale(0)} 70%{transform:scale(1.3)} 100%{transform:scale(1)} }
       `}</style>
@@ -1160,10 +1183,10 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
       {submitted ? (
         <div style={{ textAlign:"center", animation:"regFadeIn 0.5s ease" }}>
           <div style={{ fontSize:72, animation:"checkPop 0.6s ease" }}>✅</div>
-          <div style={{ fontSize:22, fontWeight:800, color:"#fff", marginTop:16 }}>
+          <div style={{ fontSize:22, fontWeight:800, color: PALETTE.text, marginTop:16 }}>
             أهلاً {form.name}!
           </div>
-          <div style={{ fontSize:14, color:"#9fb4d4", marginTop:8 }}>
+          <div style={{ fontSize:14, color: PALETTE.secondary, marginTop:8, fontFamily: FONT_EN, fontWeight: 400 }}>
             Welcome to MedLingo 🩺
           </div>
         </div>
@@ -1173,19 +1196,19 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
           {/* Header */}
           <div style={{ textAlign:"center", marginBottom:28 }}>
             <div style={{ fontSize:40, marginBottom:8 }}>🩺</div>
-            <div style={{ fontSize:26, fontWeight:900, color:"#fff", letterSpacing:1 }}>MedLingo</div>
+            <div style={{ fontSize:26, fontWeight:600, color: PALETTE.text, letterSpacing:0, fontFamily: FONT_EN }}>MedLingo</div>
             <div dir="rtl" style={{ fontSize:14, color:GOLD, marginTop:6, fontWeight:600 }}>
               سجّل للبدء في رحلة تعلّم المصطلحات الطبية
             </div>
-            <div style={{ fontSize:12, color:"#9fb4d4", marginTop:4 }}>
+            <div style={{ fontSize:12, color: PALETTE.secondary, marginTop:4, fontFamily: FONT_EN }}>
               Register to begin your medical terminology journey
             </div>
           </div>
 
           {/* Card */}
           <div style={{
-            background:"rgba(255,255,255,0.05)",
-            border:"1.5px solid rgba(212,175,55,0.25)",
+            background: PALETTE.card,
+            border: `1.5px solid ${PALETTE.border}`,
             borderRadius:24, padding:"28px 24px",
             backdropFilter:"blur(8px)",
           }}>
@@ -1196,23 +1219,23 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
 
             <button onClick={() => { onFirstInteraction?.(); handleSubmit(); }} style={{
               width:"100%", padding:"15px 0", borderRadius:16,
-              background:`linear-gradient(90deg, ${GOLD}, #F4A261)`,
+              background:`linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
               border:"none", color: DARK, fontWeight:900, fontSize:17,
               cursor:"pointer", marginTop:8, letterSpacing:0.5,
-              boxShadow:"0 4px 20px rgba(212,175,55,0.35)",
-              fontFamily:"inherit",
+              boxShadow:"0 4px 16px rgba(34,197,94,0.22)",
+              fontFamily: FONT_AR,
             }}>
               ابدأ التعلّم ✨
             </button>
 
-            <div style={{ textAlign:"center", marginTop:14, fontSize:12, color:"#9fb4d4" }}>
+            <div style={{ textAlign:"center", marginTop:14, fontSize:12, color: PALETTE.secondary }}>
               بياناتك محفوظة على جهازك فقط 🔒
             </div>
           </div>
 
           {/* Decorative dots */}
           <div style={{ display:"flex", justifyContent:"center", gap:8, marginTop:20 }}>
-            {["#E63946","#D4AF37","#2A9D8F","#457B9D"].map((c,i) => (
+            {[PALETTE.error, PALETTE.primary, PALETTE.success, PALETTE.blue].map((c,i) => (
               <div key={i} style={{ width:8, height:8, borderRadius:"50%", background:c, opacity:0.7 }} />
             ))}
           </div>
@@ -1236,8 +1259,8 @@ function AvatarTransition({ onContinue, message }) {
     <div style={{
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      background: "linear-gradient(160deg, #0f3460 0%, #16213e 60%, #1a6b9a 100%)",
-      fontFamily: "'Segoe UI', Tahoma, Arial, sans-serif",
+      background: PALETTE.appBg,
+      fontFamily: FONT_AR,
       padding: 24,
     }}>
       <style>{`
@@ -1258,7 +1281,7 @@ function AvatarTransition({ onContinue, message }) {
           top: `${Math.random() * 80}%`,
           left: `${Math.random() * 100}%`,
           width: 4, height: 4, borderRadius: "50%",
-          background: "rgba(212,175,55,0.4)",
+          background: "rgba(34,197,94,0.18)",
           pointerEvents: "none",
         }} />
       ))}
@@ -1273,7 +1296,7 @@ function AvatarTransition({ onContinue, message }) {
 
       {/* Name badge */}
       <div style={{
-        background: "#D4AF37", color: "#16213e",
+        background: PALETTE.primary, color: PALETTE.text,
         borderRadius: 20, padding: "4px 16px", fontSize: 13, fontWeight: 800,
         marginBottom: 20, letterSpacing: 1,
       }}>
@@ -1282,16 +1305,16 @@ function AvatarTransition({ onContinue, message }) {
 
       {/* Message bubble */}
       <div style={{
-        background: "rgba(255,255,255,0.1)",
-        border: "1.5px solid rgba(212,175,55,0.4)",
+        background: PALETTE.card,
+        border: `1.5px solid ${PALETTE.border}`,
         borderRadius: 20, padding: "18px 24px", maxWidth: 300,
         textAlign: "center", marginBottom: 32,
         animation: "fadeInUp 0.6s ease-out",
       }}>
-        <div dir="rtl" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
+        <div dir="rtl" style={{ fontSize: 17, fontWeight: 700, color: PALETTE.text, marginBottom: 6 }}>
           {avatar.msg}
         </div>
-        <div style={{ fontSize: 12, color: "#9fb4d4", fontStyle: "italic" }}>
+        <div style={{ fontSize: 12, color: PALETTE.secondary, fontStyle: "italic" }}>
           {avatar.msgEn}
         </div>
       </div>
@@ -1299,19 +1322,19 @@ function AvatarTransition({ onContinue, message }) {
       {/* The message passed from parent (score etc.) */}
       {message && (
         <div style={{
-          background: "rgba(42,157,143,0.2)", border: "1px solid #2A9D8F",
+          background: "#DCFCE7", border: `1px solid ${PALETTE.primary}`,
           borderRadius: 14, padding: "12px 20px", marginBottom: 24,
-          color: "#fff", textAlign: "center", fontSize: 15,
+          color: PALETTE.text, textAlign: "center", fontSize: 15,
         }}>
           {message}
         </div>
       )}
 
       <button onClick={onContinue} style={{
-        background: "linear-gradient(90deg, #D4AF37, #F4A261)",
-        color: "#16213e", border: "none", borderRadius: 16,
+        background: `linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
+        color: "#fff", border: "none", borderRadius: 16,
         padding: "14px 40px", fontWeight: 800, fontSize: 16,
-        cursor: "pointer", boxShadow: "0 4px 20px rgba(212,175,55,0.4)",
+        cursor: "pointer", boxShadow: "0 4px 16px rgba(34,197,94,0.22)",
       }}>
         متابعة ←
       </button>
@@ -1324,12 +1347,12 @@ function BackBar({ onBack, title }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <button onClick={onBack} style={{
-        background: "#fff", border: "1px solid #ddd", borderRadius: 10,
+        background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 10,
         width: 36, height: 36, cursor: "pointer", fontSize: 16, flexShrink: 0,
       }}>
         →
       </button>
-      <div style={{ fontWeight: 700, fontSize: 16, color: "#16213e" }}>{title}</div>
+      <div style={{ fontWeight: 700, fontSize: 16, color: PALETTE.text }}>{title}</div>
     </div>
   );
 }
@@ -1395,9 +1418,9 @@ function DeveloperToolsPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#f5f7fb",
-      color: "#172033",
-      fontFamily: "'Segoe UI', Tahoma, Arial, sans-serif",
+      background: PALETTE.appBg,
+      color: PALETTE.text,
+      fontFamily: FONT_AR,
       padding: 24,
       boxSizing: "border-box",
       display: "flex",
@@ -1407,16 +1430,16 @@ function DeveloperToolsPage() {
       <main style={{
         width: "100%",
         maxWidth: 760,
-        background: "#fff",
-        border: "1px solid #d9e1ee",
+        background: PALETTE.card,
+        border: `1px solid ${PALETTE.border}`,
         borderRadius: 8,
         padding: 24,
-        boxShadow: "0 16px 40px rgba(23,32,51,0.08)",
+        boxShadow: "0 16px 40px rgba(31,41,55,0.08)",
       }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#5d6b82", textTransform: "uppercase", marginBottom: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: PALETTE.secondary, textTransform: "uppercase", marginBottom: 8 }}>
           Developer Tools
         </div>
-        <h1 style={{ margin: 0, fontSize: 32, color: "#0f3460" }}>{current.en}</h1>
+        <h1 style={{ margin: 0, fontSize: 32, color: PALETTE.text, fontFamily: FONT_EN, fontWeight: 600 }}>{current.en}</h1>
         <div style={{ marginTop: 14, display: "grid", gap: 8, fontSize: 15 }}>
           <div><strong>Category:</strong> Cardiac</div>
           <div><strong>English term:</strong> {current.en}</div>
@@ -1430,12 +1453,12 @@ function DeveloperToolsPage() {
             width: "100%",
             minHeight: 180,
             marginTop: 20,
-            border: "1px solid #c8d2e2",
+            border: `1px solid ${PALETTE.border}`,
             borderRadius: 6,
             padding: 14,
             fontSize: 15,
             lineHeight: 1.6,
-            color: "#172033",
+            color: PALETTE.text,
             boxSizing: "border-box",
             resize: "vertical",
           }}
@@ -1443,10 +1466,10 @@ function DeveloperToolsPage() {
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 16 }}>
           <button onClick={previous} disabled={index === 0} style={{
-            border: "1px solid #c8d2e2",
+            border: `1px solid ${PALETTE.border}`,
             borderRadius: 6,
-            background: "#fff",
-            color: "#172033",
+            background: PALETTE.card,
+            color: PALETTE.text,
             padding: "11px 16px",
             fontWeight: 700,
             cursor: index === 0 ? "not-allowed" : "pointer",
@@ -1455,9 +1478,9 @@ function DeveloperToolsPage() {
             Previous Term
           </button>
           <button onClick={copyPrompt} style={{
-            border: "1px solid #0f3460",
+            border: `1px solid ${PALETTE.blue}`,
             borderRadius: 6,
-            background: "#0f3460",
+            background: PALETTE.blue,
             color: "#fff",
             padding: "11px 16px",
             fontWeight: 700,
@@ -1466,10 +1489,10 @@ function DeveloperToolsPage() {
             Copy Gemini Prompt
           </button>
           <button onClick={next} disabled={index === terms.length - 1} style={{
-            border: "1px solid #c8d2e2",
+            border: `1px solid ${PALETTE.border}`,
             borderRadius: 6,
-            background: "#fff",
-            color: "#172033",
+            background: PALETTE.card,
+            color: PALETTE.text,
             padding: "11px 16px",
             fontWeight: 700,
             cursor: index === terms.length - 1 ? "not-allowed" : "pointer",
@@ -1479,7 +1502,7 @@ function DeveloperToolsPage() {
           </button>
         </div>
 
-        <div style={{ minHeight: 22, marginTop: 12, color: "#1f7a4f", fontWeight: 700 }}>
+        <div style={{ minHeight: 22, marginTop: 12, color: PALETTE.success, fontWeight: 700 }}>
           {copyStatus}
         </div>
       </main>
@@ -1490,16 +1513,17 @@ function DeveloperToolsPage() {
 function ResultCard({ emoji, title, lines, onContinue }) {
   return (
     <div style={{
-      background: "#fff", borderRadius: 20, padding: "32px 24px",
-      textAlign: "center", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", marginTop: 20,
+      background: PALETTE.card, borderRadius: 20, padding: "32px 24px",
+      textAlign: "center", boxShadow: "0 8px 24px rgba(31,41,55,0.08)", marginTop: 20,
+      border: `1px solid ${PALETTE.border}`,
     }}>
       <div style={{ fontSize: 48, marginBottom: 10 }}>{emoji}</div>
-      <div style={{ fontSize: 20, fontWeight: 800, color: "#16213e", marginBottom: 10 }}>{title}</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: PALETTE.text, marginBottom: 10 }}>{title}</div>
       {lines.map((l, i) => (
-        <div key={i} style={{ fontSize: 14, color: "#555", marginBottom: 4 }}>{l}</div>
+        <div key={i} style={{ fontSize: 14, color: PALETTE.secondary, marginBottom: 4 }}>{l}</div>
       ))}
       <button onClick={onContinue} style={{
-        marginTop: 18, background: "linear-gradient(90deg,#2A9D8F,#457B9D)",
+        marginTop: 18, background: `linear-gradient(90deg,${PALETTE.primary},${PALETTE.blue})`,
         color: "#fff", border: "none", borderRadius: 14, padding: "12px 30px",
         fontWeight: 700, fontSize: 15, cursor: "pointer",
       }}>
@@ -1546,6 +1570,7 @@ function App() {
   const appHistoryRef = useRef([]);
   const welcomeAudioRef = useRef(null);
   const welcomeAutoplayTriedRef = useRef(false);
+  const welcomePlayedRef = useRef(welcomePlayed);
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1669,6 +1694,7 @@ function App() {
   }
 
   function markWelcomePlayed() {
+    welcomePlayedRef.current = true;
     setWelcomePlayed(true);
     try {
       sessionStorage.setItem("medlingo_welcome_played", "1");
@@ -1676,7 +1702,7 @@ function App() {
   }
 
   async function playWelcomeOnce({ markOnlyOnSuccess = false } = {}) {
-    if (welcomePlayed) return;
+    if (welcomePlayedRef.current) return;
     if (soundMuted) {
       markWelcomePlayed();
       return;
@@ -1791,8 +1817,8 @@ function App() {
       <div onClick={() => { playWelcomeOnce(); setView("home"); }} style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
-        background: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
-        color: "#fff", fontFamily: "'Segoe UI', Tahoma, Arial, sans-serif",
+        background: PALETTE.appBg,
+        color: PALETTE.text, fontFamily: FONT_AR,
         cursor: "pointer", position: "relative",
         padding: "72px 24px 120px", boxSizing: "border-box",
       }}>
@@ -1814,12 +1840,12 @@ function App() {
         }}>
         <div style={{
           width: 160, height: 160, borderRadius: "50%",
-          background: "#fff",
-          border: "4px solid #D4AF37",
+          background: PALETTE.card,
+          border: `4px solid ${PALETTE.primary}`,
           overflow: "hidden",
           display: "flex", alignItems: "center", justifyContent: "center",
           marginBottom: 24,
-          boxShadow: "0 0 0 8px rgba(212,175,55,0.18), 0 8px 32px rgba(0,0,0,0.4)",
+          boxShadow: "0 0 0 8px rgba(34,197,94,0.12), 0 12px 30px rgba(31,41,55,0.12)",
         }}>
           <img src={LOGO_B64} alt="The Best Academy" style={{
             width: "100%",
@@ -1829,14 +1855,14 @@ function App() {
             display: "block",
           }} />
         </div>
-        <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: 1 }}>MedLingo</div>
-        <div dir="rtl" style={{ fontSize: 14, color: "#9fb4d4", marginTop: 8, textAlign: "center" }}>
+        <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: 0, fontFamily: FONT_EN }}>MedLingo</div>
+        <div dir="rtl" style={{ fontSize: 14, color: PALETTE.secondary, marginTop: 8, textAlign: "center" }}>
           تعلّم المصطلحات الطبية بالإنجليزية
         </div>
-        <div style={{ width: 140, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.12)", marginTop: 34, overflow: "hidden" }}>
+        <div style={{ width: 140, height: 4, borderRadius: 99, background: PALETTE.border, marginTop: 34, overflow: "hidden" }}>
           <div style={{
             height: "100%", borderRadius: 99,
-            background: "linear-gradient(90deg, #E63946, #F4A261, #2A9D8F, #457B9D)",
+            background: `linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
             animation: "medlingoLoad 3.5s ease-in-out forwards",
           }} />
         </div>
@@ -1847,17 +1873,17 @@ function App() {
           position: "absolute", bottom: 32,
           display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
         }}>
-          <div style={{ fontSize: 11, color: "rgba(159,180,212,0.7)", letterSpacing: 1, textTransform: "uppercase" }}>
+          <div style={{ fontSize: 11, color: PALETTE.secondary, letterSpacing: 1, textTransform: "uppercase", fontFamily: FONT_EN }}>
             Powered by
           </div>
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(212,175,55,0.3)",
+            background: PALETTE.card,
+            border: `1px solid ${PALETTE.border}`,
             borderRadius: 20, padding: "6px 14px",
           }}>
             <img src={LOGO_B64} alt="The Best Academy" style={{ width: 26, height: 26, borderRadius: "50%", objectFit: "cover", background: "#fff" }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#D4AF37", letterSpacing: 0.5 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: PALETTE.success, letterSpacing: 0, fontFamily: FONT_EN }}>
               The Best Academy
             </span>
           </div>
@@ -1869,8 +1895,8 @@ function App() {
   return (
     <div dir="rtl" onPointerDownCapture={playWelcomeOnce} style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #e8f8f1 0%, #bdebd8 45%, #2A9D8F 100%)",
-      fontFamily: "'Segoe UI', Tahoma, Arial, sans-serif",
+      background: PALETTE.appBg,
+      fontFamily: FONT_AR,
       padding: "20px 16px 60px",
       boxSizing: "border-box",
     }}>
@@ -1882,14 +1908,14 @@ function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: "linear-gradient(135deg,#0f3460,#16213e)",
+            background: `linear-gradient(135deg,${PALETTE.primary},${PALETTE.blue})`,
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
           }}>
             🩺
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 20, color: "#16213e" }}>MedLingo</div>
-            {user && <div style={{ fontSize: 11, color: "#888", marginTop: 1 }}>أهلاً، {user.name.split(" ")[0]} 👋</div>}
+            <div style={{ fontWeight: 600, fontSize: 20, color: PALETTE.text, fontFamily: FONT_EN }}>MedLingo</div>
+            {user && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {user.name.split(" ")[0]} 👋</div>}
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -1898,9 +1924,9 @@ function App() {
             onClick={() => setSoundMuted(muted => !muted)}
             aria-label={soundMuted ? "Unmute sounds" : "Mute sounds"}
             style={{
-              background: "#fff",
-              color: "#16213e",
-              border: "none",
+              background: PALETTE.card,
+              color: PALETTE.text,
+              border: `1px solid ${PALETTE.border}`,
               borderRadius: 12,
               padding: "6px 10px",
               fontSize: 13,
@@ -1910,10 +1936,10 @@ function App() {
           >
             {soundMuted ? "🔇" : "🔊"}
           </button>
-          <div style={{ background: "#fff3cd", color: "#856404", borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
+          <div style={{ background: PALETTE.card, color: PALETTE.text, border: `1px solid ${PALETTE.border}`, borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
             🔥 {streak}
           </div>
-          <div style={{ background: "#d1fae5", color: "#065f46", borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
+          <div style={{ background: "#DCFCE7", color: PALETTE.success, border: `1px solid ${PALETTE.border}`, borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
             ⭐ {xp}
           </div>
         </div>
@@ -1922,13 +1948,13 @@ function App() {
       <div style={{ maxWidth: 460, margin: "0 auto" }}>
         {view === "home" && (
           <>
-            <div style={{ fontSize: 15, color: "#555", marginBottom: 16, textAlign: "center" }}>
+            <div style={{ fontSize: 15, color: PALETTE.secondary, marginBottom: 16, textAlign: "center" }}>
               اختر فئة لتبدأ التعلّم
             </div>
             <div style={{ position: "relative", marginBottom: 14 }}>
               <span style={{
                 position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
-                color: "#888", fontSize: 17, pointerEvents: "none",
+                color: PALETTE.secondary, fontSize: 17, pointerEvents: "none",
               }}>
                 🔍
               </span>
@@ -1938,9 +1964,9 @@ function App() {
                 placeholder="ابحث عن مصطلح"
                 style={{
                   width: "100%", boxSizing: "border-box",
-                  border: "1.5px solid rgba(42,157,143,0.25)",
+                  border: `1.5px solid ${PALETTE.border}`,
                   borderRadius: 14, padding: "12px 16px 12px 42px",
-                  background: "#fff", color: "#16213e",
+                  background: PALETTE.card, color: PALETTE.text,
                   fontSize: 14, outline: "none",
                   fontFamily: "inherit",
                 }}
@@ -1950,12 +1976,12 @@ function App() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
                 {termSearchResults.map(({ term, category: catId, subtab: subId, termIndex }) => (
                   <button key={`${catId}-${subId}-${term.en}`} onClick={() => openTermResult({ category: catId, subtab: subId, termIndex })} style={{
-                    background: "#fff", border: "1.5px solid rgba(42,157,143,0.25)",
+                    background: PALETTE.card, border: `1.5px solid ${PALETTE.border}`,
                     borderRadius: 14, padding: "12px 14px", cursor: "pointer",
-                    textAlign: "right", boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    textAlign: "right", boxShadow: "0 4px 14px rgba(31,41,55,0.05)",
                   }}>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: "#16213e" }}>{term.en}</div>
-                    <div style={{ fontSize: 12, color: "#666", marginTop: 3 }}>{term.ar}</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: PALETTE.text, fontFamily: FONT_EN, direction: "ltr" }}>{term.en}</div>
+                    <div style={{ fontSize: 12, color: PALETTE.secondary, marginTop: 3, fontFamily: FONT_AR, fontWeight: 500 }}>{term.ar}</div>
                   </button>
                 ))}
               </div>
@@ -1963,17 +1989,17 @@ function App() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {visibleCategories.map(cat => (
                 <button key={cat.id} onClick={() => openCategory(cat.id)} style={{
-                  background: "#fff", border: `2px solid ${cat.color}33`,
+                  background: PALETTE.card, border: `1.5px solid ${PALETTE.border}`,
                   borderRadius: 18, padding: "20px 12px", cursor: "pointer",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  boxShadow: "0 6px 18px rgba(31,41,55,0.06)",
                 }}>
                   <div style={{ fontSize: 26 }}>{cat.label.split(" ")[0]}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#16213e" }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: PALETTE.text, fontFamily: FONT_AR }}>
                     {cat.label.split(" ").slice(1).join(" ")}
-                    <span style={{ fontWeight: 400, color: "#999" }}> · {cat.en}</span>
+                    <span style={{ fontWeight: 600, color: PALETTE.secondary, fontFamily: FONT_EN }}> · {cat.en}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: "#888" }}>{cat.desc}</div>
+                  <div style={{ fontSize: 11, color: PALETTE.secondary }}>{cat.desc}</div>
                 </button>
               ))}
             </div>
@@ -1986,12 +2012,12 @@ function App() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
               {subtabList.map(sub => (
                 <button key={sub.id} onClick={() => openSubtab(sub.id)} style={{
-                  background: "#fff", border: `2px solid ${currentCategory.color}33`,
+                  background: PALETTE.card, border: `1.5px solid ${PALETTE.border}`,
                   borderRadius: 14, padding: "16px 10px", cursor: "pointer",
-                  fontWeight: 700, fontSize: 14, color: "#16213e",
+                  fontWeight: 600, fontSize: 14, color: PALETTE.text, fontFamily: FONT_AR,
                 }}>
                   {sub.label}
-                  <span style={{ fontWeight: 400, color: "#999" }}> · {sub.en}</span>
+                  <span style={{ fontWeight: 600, color: PALETTE.secondary, fontFamily: FONT_EN }}> · {sub.en}</span>
                 </button>
               ))}
             </div>
@@ -2009,7 +2035,7 @@ function App() {
                     {activeTerms.length} مصطلح
                   </div>
                 </button>
-                <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
+                <button onClick={startQuiz} style={modeButtonStyle(PALETTE.blue)}>
                   📝 اختبار سريع
                   <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
                     {activeQuizQuestionCount} سؤال
@@ -2025,7 +2051,7 @@ function App() {
                   canPrevious={cardIndex > 0}
                   canNext={cardIndex + 1 < activeTerms.length}
                 />
-                <button onClick={startQuiz} style={modeButtonStyle("#457B9D")}>
+                <button onClick={startQuiz} style={modeButtonStyle(PALETTE.blue)}>
                   📝 اختبار سريع
                   <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.85, marginTop: 4 }}>
                     {activeQuizQuestionCount} سؤال
