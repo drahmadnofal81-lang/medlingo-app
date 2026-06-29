@@ -5,6 +5,19 @@ function getDefinitionText(term) {
   return term.definition || term.example || "";
 }
 
+function playSoundEffect(fileName, muted = false) {
+  if (muted || typeof Audio === "undefined") return;
+
+  try {
+    const audio = new Audio(`/sounds/${fileName}`);
+    audio.volume = 0.25;
+    const playPromise = audio.play();
+    if (playPromise?.catch) playPromise.catch(() => {});
+  } catch {
+    // Sound effects are optional; missing files should never interrupt learning.
+  }
+}
+
 function getArabicDefinitionText(term) {
   if (term.definitionAr) return term.definitionAr;
 
@@ -741,7 +754,7 @@ function buildQuizQuestions(terms) {
 }
 
 // ── Quiz Component ───────────────────────────────────────────────────────────
-function Quiz({ terms, onFinish }) {
+function Quiz({ terms, onFinish, onSound }) {
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -786,6 +799,7 @@ function Quiz({ terms, onFinish }) {
     if (selected) return;
     setSelected(opt);
     const correct = opt.isCorrect ?? opt.key === current.correctAnswer;
+    onSound?.(correct ? "correct.mp3" : "wrong.mp3");
     if (correct) setScore(s => s + 1);
     getAiFeedback(correct, currentTerm, opt.value);
   }
@@ -1500,6 +1514,7 @@ function App() {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [soundMuted, setSoundMuted] = useState(false);
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1564,8 +1579,13 @@ function App() {
     setView("quiz");
   }
 
+  function playAppSound(fileName) {
+    playSoundEffect(fileName, soundMuted);
+  }
+
   function advanceCard(q) {
     if (cardIndex + 1 < q.length) {
+      playAppSound("card-click.mp3");
       setCardIndex(i => i + 1);
     } else {
       setStreak(s => s + 1);
@@ -1587,6 +1607,7 @@ function App() {
   }
 
   function handlePreviousCard() {
+    if (cardIndex > 0) playAppSound("card-click.mp3");
     setCardIndex(i => Math.max(0, i - 1));
   }
 
@@ -1595,10 +1616,12 @@ function App() {
   }
 
   function handleNextReferenceTerm() {
+    if (cardIndex < activeTerms.length - 1) playAppSound("card-click.mp3");
     setCardIndex(i => Math.min(activeTerms.length - 1, i + 1));
   }
 
   function handleQuizFinish(score) {
+    playAppSound("success.mp3");
     setQuizScore(score);
     setXp(x => x + score * 10);
     setStreak(s => s + 1);
@@ -1735,6 +1758,23 @@ function App() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
+          <button
+            type="button"
+            onClick={() => setSoundMuted(muted => !muted)}
+            aria-label={soundMuted ? "Unmute sounds" : "Mute sounds"}
+            style={{
+              background: "#fff",
+              color: "#16213e",
+              border: "none",
+              borderRadius: 12,
+              padding: "6px 10px",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {soundMuted ? "🔇" : "🔊"}
+          </button>
           <div style={{ background: "#fff3cd", color: "#856404", borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
             🔥 {streak}
           </div>
@@ -1896,7 +1936,7 @@ function App() {
           <>
             <BackBar onBack={() => setView("mode")} title="اختبار" />
             <div style={{ marginTop: 16 }}>
-              <Quiz terms={activeTerms} onFinish={handleQuizFinish} />
+              <Quiz terms={activeTerms} onFinish={handleQuizFinish} onSound={playAppSound} />
             </div>
           </>
         )}
