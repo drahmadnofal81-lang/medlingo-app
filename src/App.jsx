@@ -189,7 +189,6 @@ const SUBTABS = {
     { id: "skeletal",     label: "🦴 العظام", en: "Skeletal" },
     { id: "neuro",        label: "🧠 الجهاز العصبي", en: "Nervous System" },
     { id: "respiratory",  label: "🫁 الجهاز التنفسي", en: "Respiratory" },
-    { id: "abdominal",    label: "🫃 البطن", en: "Abdominal" },
     { id: "muscle",        label: "💪 العضلات", en: "Muscle" },
   ],
   physiology: [
