@@ -213,11 +213,10 @@ const SUBTABS = {
     { id: "lipids",        label: "🧈 دهون", en: "Lipids" },
   ],
   histology: [
-    { id: "epithelial",   label: "🧱 ظهاري", en: "Epithelial" },
-    { id: "connective",   label: "🕸️ ضام", en: "Connective" },
+    { id: "cell",          label: "🔵 الخلية", en: "Cell" },
+    { id: "tissues",      label: "🧱 الأنسجة", en: "Tissues" },
     { id: "nervous",      label: "🧠 عصبي", en: "Nervous" },
     { id: "muscular",     label: "💪 عضلي", en: "Muscular" },
-    { id: "cell",          label: "🔵 الخلية", en: "Cell" },
   ],
   organs: [
     { id: "main", label: "🫁 أعضاء الجسم", en: "Body Organs" },
