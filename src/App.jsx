@@ -1117,6 +1117,9 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
   const [form, setForm] = useState({ name: "", college: "", university: "", phone: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const GOLD = PALETTE.primary;
   const DARK = PALETTE.text;
@@ -1124,22 +1127,48 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
   function validate() {
     const e = {};
     if (!form.name.trim())       e.name       = "الاسم مطلوب";
-    if (!form.college.trim())    e.college    = "اسم الكلية مطلوب";
-    if (!form.university.trim()) e.university = "اسم الجامعة مطلوب";
-    if (!/^[0-9]{7,15}$/.test(form.phone.replace(/\s/g,"")))
-                                  e.phone      = "رقم هاتف غير صحيح";
+    if (!form.phone.trim())      e.phone      = "رقم الهاتف مطلوب";
     return e;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (submitting) return;
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    setSubmitted(true);
-    try { localStorage.setItem("medlingo_user", JSON.stringify(form)); } catch {}
-    setTimeout(() => onRegister(form), 900);
+    setSubmitting(true);
+    setSubmitError("");
+
+    const registrationData = {
+      ...form,
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+    };
+
+    try {
+      const body = new URLSearchParams();
+      body.append("entry.369656156", registrationData.name);
+      body.append("entry.434435752", registrationData.phone);
+
+      await fetch("https://docs.google.com/forms/d/e/1FAIpQLScwKk_vUjnuLv3ZWNtZCRev8SGml2cMzDnu6OfNicarARK4DA/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+      });
+
+      setSubmitMessage("Registration completed successfully.");
+      setSubmitted(true);
+      setForm({ name: "", college: "", university: "", phone: "" });
+      try { localStorage.setItem("medlingo_user", JSON.stringify(registrationData)); } catch {}
+      setTimeout(() => onRegister(registrationData), 1200);
+    } catch {
+      setSubmitError("تعذر إكمال التسجيل الآن. من فضلك حاول مرة أخرى.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  const Field = ({ id, label, labelEn, placeholder, type="text", icon }) => (
+  const renderField = ({ id, label, labelEn, placeholder, type="text", icon }) => (
     <div style={{ marginBottom: 18 }}>
       <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
         <span style={{ fontSize:13, color: GOLD, fontWeight:700 }}>{icon} {label}</span>
@@ -1187,7 +1216,7 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
         <div style={{ textAlign:"center", animation:"regFadeIn 0.5s ease" }}>
           <div style={{ fontSize:72, animation:"checkPop 0.6s ease" }}>✅</div>
           <div style={{ fontSize:22, fontWeight:800, color: PALETTE.text, marginTop:16 }}>
-            أهلاً {form.name}!
+            {submitMessage || "Registration completed successfully."}
           </div>
           <div style={{ fontSize:14, color: PALETTE.secondary, marginTop:8, fontFamily: FONT_EN, fontWeight: 400 }}>
             Welcome to MedLingo 🩺
@@ -1215,21 +1244,28 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
             borderRadius:24, padding:"28px 24px",
             backdropFilter:"blur(8px)",
           }}>
-            <Field id="name"       label="الاسم الكامل"  labelEn="Full Name"   placeholder="اكتب اسمك هنا"     icon="👤" />
-            <Field id="college"    label="الكلية"         labelEn="College"     placeholder="مثال: كلية الطب"   icon="🏛️" />
-            <Field id="university" label="الجامعة"        labelEn="University"  placeholder="مثال: جامعة القاهرة" icon="🎓" />
-            <Field id="phone"      label="رقم الهاتف"    labelEn="Phone Number" placeholder="+20 10XXXXXXXX" type="tel" icon="📱" />
+            {renderField({ id: "name", label: "الاسم الكامل", labelEn: "Full Name", placeholder: "اكتب اسمك هنا", icon: "👤" })}
+            {renderField({ id: "college", label: "الكلية", labelEn: "College", placeholder: "مثال: كلية الطب", icon: "🏛️" })}
+            {renderField({ id: "university", label: "الجامعة", labelEn: "University", placeholder: "مثال: جامعة القاهرة", icon: "🎓" })}
+            {renderField({ id: "phone", label: "رقم الهاتف", labelEn: "Phone Number", placeholder: "+20 10XXXXXXXX", type: "tel", icon: "📱" })}
 
-            <button onClick={() => { onFirstInteraction?.(); handleSubmit(); }} style={{
+            <button disabled={submitting} onClick={() => { onFirstInteraction?.(); handleSubmit(); }} style={{
               width:"100%", padding:"15px 0", borderRadius:16,
               background:`linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
               border:"none", color: DARK, fontWeight:900, fontSize:17,
-              cursor:"pointer", marginTop:8, letterSpacing:0.5,
+              cursor: submitting ? "default" : "pointer", marginTop:8, letterSpacing:0.5,
               boxShadow:"0 4px 16px rgba(34,197,94,0.22)",
               fontFamily: FONT_AR,
+              opacity: submitting ? 0.75 : 1,
             }}>
-              ابدأ التعلّم ✨
+              {submitting ? "جارٍ التسجيل..." : "ابدأ التعلّم ✨"}
             </button>
+
+            {submitError && (
+              <div style={{ textAlign:"center", marginTop:10, fontSize:12, color: PALETTE.error }}>
+                {submitError}
+              </div>
+            )}
 
             <div style={{ textAlign:"center", marginTop:14, fontSize:12, color: PALETTE.secondary }}>
               بياناتك محفوظة على جهازك فقط 🔒
