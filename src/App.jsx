@@ -2113,7 +2113,10 @@ function App() {
                     borderRadius: 14, padding: "12px 14px", cursor: "pointer",
                     textAlign: "right", boxShadow: "0 4px 14px rgba(31,41,55,0.05)",
                   }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: PALETTE.text, fontFamily: FONT_EN, direction: "ltr" }}>{term.en}</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, direction: "ltr" }}>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: PALETTE.text, fontFamily: FONT_EN }}>{term.en}</div>
+                      <PronounceButton term={term.en} size={16} as="span" />
+                    </div>
                     <div style={{ fontSize: 12, color: PALETTE.secondary, marginTop: 3, fontFamily: FONT_AR, fontWeight: 500 }}>{term.ar}</div>
                   </button>
                 ))}
