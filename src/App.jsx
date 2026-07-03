@@ -51,6 +51,71 @@ function playPreparedSound(audio, muted = false) {
   }
 }
 
+function pronounceEnglishTerm(term) {
+  if (!term || typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") return;
+
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(term);
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+  } catch {}
+}
+
+function PronounceButton({ term, size = 20, as = "button" }) {
+  const commonStyle = {
+    border: "none",
+    background: "transparent",
+    color: PALETTE.secondary,
+    padding: 4,
+    margin: 0,
+    cursor: "pointer",
+    fontSize: size,
+    lineHeight: 1,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  };
+
+  function handlePronounce(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    pronounceEnglishTerm(term);
+  }
+
+  if (as === "span") {
+    return (
+      <span
+        role="button"
+        tabIndex={0}
+        aria-label={`Pronounce ${term}`}
+        onClick={handlePronounce}
+        onKeyDown={event => {
+          if (event.key === "Enter" || event.key === " ") handlePronounce(event);
+        }}
+        style={commonStyle}
+      >
+        🔊
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={`Pronounce ${term}`}
+      onClick={handlePronounce}
+      style={commonStyle}
+    >
+      🔊
+    </button>
+  );
+}
+
 function getArabicDefinitionText(term) {
   if (term.definitionAr) return term.definitionAr;
 
@@ -381,8 +446,11 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         </div>
 
         {/* English term — big, bold, yellow */}
-        <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, marginBottom: 8, textAlign: "center", color: PALETTE.text, fontFamily: FONT_EN }}>
-          {term.en}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, textAlign: "center" }}>
+          <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, color: PALETTE.text, fontFamily: FONT_EN }}>
+            {term.en}
+          </div>
+          <PronounceButton term={term.en} />
         </div>
 
         {/* Arabic translation — underneath */}
@@ -401,26 +469,6 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 4,
           background: `linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})` }} />
       </div>
-
-      {/* AI Hint */}
-      {!aiHint ? (
-        <button onClick={getAiHint} disabled={loading} style={{
-          background: "transparent", border: `1.5px solid ${PALETTE.blue}`,
-          color: PALETTE.blue, borderRadius: 12, padding: "8px 20px",
-          cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
-        }}>
-          {loading ? "⏳ جاري التحميل..." : "✨ تلميح ذكي من AI"}
-        </button>
-      ) : (
-        <div style={{
-          background: "#EFF6FF", border: `1px solid ${PALETTE.border}`,
-          borderRadius: 14, padding: "14px 18px", maxWidth: 420,
-          fontSize: 14, color: PALETTE.text, direction: "rtl", lineHeight: 1.8,
-          whiteSpace: "pre-line",
-        }}>
-          🤖 {aiHint}
-        </div>
-      )}
 
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 420, direction: "ltr" }}>
@@ -588,8 +636,11 @@ function ReferenceTerms({ term, onPrevious, onNext, canPrevious, canNext }) {
         position: "relative", overflow: "hidden",
         boxSizing: "border-box",
       }}>
-        <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, marginBottom: 8, textAlign: "center", color: PALETTE.text, direction: "ltr", fontFamily: FONT_EN }}>
-          {term.en}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, textAlign: "center", direction: "ltr" }}>
+          <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 0, color: PALETTE.text, fontFamily: FONT_EN }}>
+            {term.en}
+          </div>
+          <PronounceButton term={term.en} />
         </div>
         <div style={{ fontSize: 20, fontWeight: 500, color: PALETTE.success, textAlign: "center", direction: "rtl", marginBottom: 10, fontFamily: FONT_AR }}>
           {term.ar}
@@ -1123,11 +1174,15 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
 
   const GOLD = PALETTE.primary;
   const DARK = PALETTE.text;
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzNV0xPKSQnMYNBbgA_NMgC8wSgePVC9f2Q_cbtngjnd0rlk00gKQYt8a7p50PWhDv/exec";
 
   function validate() {
     const e = {};
     if (!form.name.trim())       e.name       = "الاسم مطلوب";
-    if (!form.phone.trim())      e.phone      = "رقم الهاتف مطلوب";
+    const phoneValue = form.phone.trim();
+    const phoneDigits = phoneValue.startsWith("+") ? phoneValue.slice(1) : phoneValue;
+    if (!phoneValue) e.phone = "رقم الهاتف مطلوب";
+    else if (!/^\d+$/.test(phoneDigits) || phoneDigits.length < 7) e.phone = "Please enter a valid phone number.";
     return e;
   }
 
@@ -1145,15 +1200,10 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
     };
 
     try {
-      const body = new URLSearchParams();
-      body.append("entry.369656156", registrationData.name);
-      body.append("entry.434435752", registrationData.phone);
-
-      await fetch("https://docs.google.com/forms/d/e/1FAIpQLScwKk_vUjnuLv3ZWNtZCRev8SGml2cMzDnu6OfNicarARK4DA/formResponse", {
+      await fetch(WEB_APP_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
+        body: JSON.stringify(registrationData),
       });
 
       setSubmitMessage("Registration completed successfully.");
@@ -1163,7 +1213,6 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
       setTimeout(() => onRegister(registrationData), 1200);
     } catch {
       setSubmitError("تعذر إكمال التسجيل الآن. من فضلك حاول مرة أخرى.");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -1478,10 +1527,13 @@ function DeveloperToolsPage() {
         <div style={{ fontSize: 13, fontWeight: 800, color: PALETTE.secondary, textTransform: "uppercase", marginBottom: 8 }}>
           Developer Tools
         </div>
-        <h1 style={{ margin: 0, fontSize: 32, color: PALETTE.text, fontFamily: FONT_EN, fontWeight: 600 }}>{current.en}</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 32, color: PALETTE.text, fontFamily: FONT_EN, fontWeight: 600 }}>{current.en}</h1>
+          <PronounceButton term={current.en} />
+        </div>
         <div style={{ marginTop: 14, display: "grid", gap: 8, fontSize: 15 }}>
           <div><strong>Category:</strong> Cardiac</div>
-          <div><strong>English term:</strong> {current.en}</div>
+          <div><strong>English term:</strong> {current.en} <PronounceButton term={current.en} size={16} /></div>
           <div><strong>Suggested image filename:</strong> {toImageFilename(current.en)}</div>
         </div>
 
@@ -1738,6 +1790,26 @@ function App() {
     playSoundEffect(fileName, soundMuted);
   }
 
+  function resetRegistration() {
+    try {
+      localStorage.removeItem("medlingo_user");
+      sessionStorage.removeItem("medlingo_welcome_played");
+    } catch {}
+    appHistoryRef.current = [];
+    welcomePlayedRef.current = false;
+    welcomeAutoplayTriedRef.current = false;
+    setUser(null);
+    setCategory(null);
+    setSubtab(null);
+    setQueue([]);
+    setCardIndex(0);
+    setKnownCount(0);
+    setQuizScore(0);
+    setSearchQuery("");
+    setWelcomePlayed(false);
+    setView("register");
+  }
+
   function markWelcomePlayed() {
     welcomePlayedRef.current = true;
     setWelcomePlayed(true);
@@ -1837,6 +1909,7 @@ function App() {
   const activeTerms = category && subtab ? getTermsForSubtab(category, subtab) : [];
   const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
+  const showResetRegistration = import.meta.env.DEV || window.location.hostname === "localhost";
   const visibleCategories = CATEGORIES.filter(cat => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
@@ -1960,6 +2033,25 @@ function App() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
+          {showResetRegistration && (
+            <button
+              type="button"
+              onClick={resetRegistration}
+              style={{
+                background: PALETTE.card,
+                color: PALETTE.secondary,
+                border: `1px solid ${PALETTE.border}`,
+                borderRadius: 12,
+                padding: "6px 10px",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_EN,
+              }}
+            >
+              Reset Registration
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setSoundMuted(muted => !muted)}
