@@ -2332,7 +2332,7 @@ function App() {
               color: PALETTE.text,
               textAlign: "center",
             }}>
-              medlingo.support@example.com
+              thebestacademyinkasrelainy@gmail.com
             </div>
           </InfoPage>
         )}
