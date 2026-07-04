@@ -1793,6 +1793,7 @@ function App() {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(() => {
     try {
       return localStorage.getItem("medlingo_sound_muted") === "1";
@@ -1956,6 +1957,7 @@ function App() {
     try {
       localStorage.setItem("medlingo_session_active", "false");
     } catch {}
+    setSettingsOpen(false);
     clearActiveAppState({ keepUser: true });
   }
 
@@ -1969,7 +1971,13 @@ function App() {
       localStorage.removeItem("medlingo_consent");
       localStorage.removeItem("medlingo_session_active");
     } catch {}
+    setSettingsOpen(false);
     clearActiveAppState();
+  }
+
+  function openSettingsView(nextView) {
+    setSettingsOpen(false);
+    setView(nextView);
   }
 
   function getAppSnapshot() {
@@ -2182,41 +2190,7 @@ function App() {
             {firstName && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {firstName} 👋</div>}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <button
-            type="button"
-            onClick={logout}
-            style={{
-              background: PALETTE.card,
-              color: PALETTE.secondary,
-              border: `1px solid ${PALETTE.border}`,
-              borderRadius: 12,
-              padding: "6px 10px",
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_EN,
-            }}
-          >
-            Logout
-          </button>
-          <button
-            type="button"
-            onClick={resetRegistration}
-            style={{
-              background: PALETTE.card,
-              color: PALETTE.secondary,
-              border: `1px solid ${PALETTE.border}`,
-              borderRadius: 12,
-              padding: "6px 10px",
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_EN,
-            }}
-          >
-            Reset Registration
-          </button>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end", position: "relative" }}>
           <button
             type="button"
             onClick={() => setSoundMuted(muted => !muted)}
@@ -2234,6 +2208,71 @@ function App() {
           >
             {soundMuted ? "🔇" : "🔊"}
           </button>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(open => !open)}
+            aria-label="Open settings"
+            aria-expanded={settingsOpen}
+            style={{
+              background: PALETTE.card,
+              color: PALETTE.text,
+              border: `1px solid ${PALETTE.border}`,
+              borderRadius: 12,
+              padding: "6px 10px",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            ⚙️
+          </button>
+          {settingsOpen && (
+            <div style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              left: 0,
+              zIndex: 20,
+              width: 220,
+              maxWidth: "calc(100vw - 32px)",
+              background: PALETTE.card,
+              border: `1.5px solid ${PALETTE.border}`,
+              borderRadius: 16,
+              boxShadow: "0 12px 30px rgba(31,41,55,0.14)",
+              padding: 8,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}>
+              {[
+                { label: "Privacy Policy", action: () => openSettingsView("privacy") },
+                { label: "Terms of Use", action: () => openSettingsView("terms") },
+                { label: "Delete My Data", action: () => openSettingsView("deleteData") },
+                { label: "Logout", action: logout },
+                { label: "Reset Registration", action: resetRegistration },
+              ].map(item => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.action}
+                  style={{
+                    width: "100%",
+                    background: "transparent",
+                    color: item.label === "Reset Registration" ? PALETTE.error : PALETTE.text,
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    fontFamily: FONT_EN,
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div style={{ background: PALETTE.card, color: PALETTE.text, border: `1px solid ${PALETTE.border}`, borderRadius: 12, padding: "6px 12px", fontSize: 13, fontWeight: 700 }}>
             🔥 {streak}
           </div>
@@ -2303,40 +2342,6 @@ function App() {
                   <div style={{ fontSize: 11, color: PALETTE.secondary }}>{cat.desc}</div>
                 </button>
               ))}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
-              <button type="button" onClick={() => setView("privacy")} style={{
-                background: PALETTE.card,
-                border: `1.5px solid ${PALETTE.border}`,
-                borderRadius: 14,
-                padding: "12px 10px",
-                cursor: "pointer",
-                color: PALETTE.text,
-                fontWeight: 700,
-                fontSize: 13,
-                fontFamily: FONT_AR,
-              }}>
-                سياسة الخصوصية
-                <span style={{ display: "block", marginTop: 2, color: PALETTE.secondary, fontSize: 11, fontFamily: FONT_EN }}>
-                  Privacy Policy
-                </span>
-              </button>
-              <button type="button" onClick={() => setView("deleteData")} style={{
-                background: PALETTE.card,
-                border: `1.5px solid ${PALETTE.border}`,
-                borderRadius: 14,
-                padding: "12px 10px",
-                cursor: "pointer",
-                color: PALETTE.text,
-                fontWeight: 700,
-                fontSize: 13,
-                fontFamily: FONT_AR,
-              }}>
-                حذف بياناتي
-                <span style={{ display: "block", marginTop: 2, color: PALETTE.secondary, fontSize: 11, fontFamily: FONT_EN }}>
-                  Delete My Data
-                </span>
-              </button>
             </div>
           </>
         )}
