@@ -316,6 +316,7 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
     ? [".webp", ".png", ".jpg", ".jpeg"].map(ext => `${imageBase}${ext}`)
     : [];
   const currentImageSrc = imageCandidates[imageIndex] || "";
+  const imageAlt = term.imageAlt || term.en;
   const definitionText = getDefinitionText(term);
   const definitionArText = getArabicDefinitionText(term);
 
@@ -418,7 +419,9 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
               <img
                 key={currentImageSrc}
                 src={currentImageSrc}
-                alt={term.en}
+                alt={imageAlt}
+                loading="lazy"
+                decoding="async"
                 onError={() => {
                   if (imageIndex + 1 < imageCandidates.length) setImageIndex(i => i + 1);
                   else setImageError(true);
@@ -549,7 +552,8 @@ function FlashCard({ term, onPrevious, onNext, canPrevious, canNext }) {
             }}>
               <img
                 src={currentImageSrc}
-                alt={term.en}
+                alt={imageAlt}
+                decoding="async"
                 style={{
                   maxWidth: "86vw",
                   maxHeight: "70vh",
