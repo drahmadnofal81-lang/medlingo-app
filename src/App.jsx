@@ -2088,6 +2088,13 @@ function App() {
   const activeTerms = category && subtab ? getTermsForSubtab(category, subtab) : [];
   const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
+  const settingsItems = [
+    { label: "Privacy Policy", action: () => openSettingsView("privacy") },
+    { label: "Terms of Use", action: () => openSettingsView("terms") },
+    { label: "Delete My Data", action: () => openSettingsView("deleteData") },
+    { label: "Logout", action: logout },
+    ...(import.meta.env.DEV ? [{ label: "Reset Registration", action: resetRegistration }] : []),
+  ];
   const firstName = user?.name?.trim().split(/\s+/)[0];
   const visibleCategories = CATEGORIES.filter(cat => {
     const q = searchQuery.trim().toLowerCase();
@@ -2274,13 +2281,7 @@ function App() {
               flexDirection: "column",
               gap: 6,
             }}>
-              {[
-                { label: "Privacy Policy", action: () => openSettingsView("privacy") },
-                { label: "Terms of Use", action: () => openSettingsView("terms") },
-                { label: "Delete My Data", action: () => openSettingsView("deleteData") },
-                { label: "Logout", action: logout },
-                { label: "Reset Registration", action: resetRegistration },
-              ].map(item => (
+              {settingsItems.map(item => (
                 <button
                   key={item.label}
                   type="button"
