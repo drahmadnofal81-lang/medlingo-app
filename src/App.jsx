@@ -1154,8 +1154,9 @@ const AVATARS = [
 
 
 // ── Registration Page ────────────────────────────────────────────────────────
-function RegisterPage({ onRegister }) {
+function RegisterPage({ onRegister, onNavigate }) {
   const [form, setForm] = useState({ name: "", college: "", university: "", phone: "", gender: "" });
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -1164,7 +1165,7 @@ function RegisterPage({ onRegister }) {
 
   const GOLD = PALETTE.primary;
   const DARK = PALETTE.text;
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzNV0xPKSQnMYNBbgA_NMgC8wSgePVC9f2Q_cbtngjnd0rlk00gKQYt8a7p50PWhDv/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5W0GcbZVefOZlJGOc4McqIitSjdQlbwMonWgAa4dA2INfDRbdmWM10YApdLjbE9Twvw/exec";
 
   function validate() {
     const e = {};
@@ -1174,6 +1175,7 @@ function RegisterPage({ onRegister }) {
     if (!phoneValue) e.phone = "رقم الهاتف مطلوب";
     else if (!/^\d+$/.test(phoneDigits) || phoneDigits.length < 7) e.phone = "Please enter a valid phone number.";
     if (!form.gender) e.gender = "اختار النوع";
+    if (!consentAccepted) e.consent = "Please accept the Privacy Policy and Terms of Use to continue.";
     return e;
   }
 
@@ -1203,7 +1205,11 @@ function RegisterPage({ onRegister }) {
       setSubmitMessage("Registration completed successfully.");
       setSubmitted(true);
       setForm({ name: "", college: "", university: "", phone: "", gender: "" });
-      try { localStorage.setItem("medlingo_user", JSON.stringify(registrationData)); } catch {}
+      setConsentAccepted(false);
+      try {
+        localStorage.setItem("medlingo_user", JSON.stringify(registrationData));
+        localStorage.setItem("medlingo_consent", "true");
+      } catch {}
       setTimeout(() => onRegister(registrationData), 1200);
     } catch {
       setSubmitError("تعذر إكمال التسجيل الآن. من فضلك حاول مرة أخرى.");
@@ -1334,6 +1340,68 @@ function RegisterPage({ onRegister }) {
               )}
             </div>
 
+            <label style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 10,
+              marginBottom: 16,
+              color: PALETTE.text,
+              fontSize: 12,
+              lineHeight: 1.55,
+              fontFamily: FONT_EN,
+              direction: "ltr",
+            }}>
+              <input
+                type="checkbox"
+                checked={consentAccepted}
+                onChange={e => { setConsentAccepted(e.target.checked); setErrors(er => ({ ...er, consent: null })); }}
+                style={{ marginTop: 3, accentColor: PALETTE.primary, flexShrink: 0 }}
+              />
+              <span>
+                I have read and agree to the{" "}
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("privacy")}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: PALETTE.blue,
+                    padding: 0,
+                    font: "inherit",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Privacy Policy
+                </button>{" "}
+                and{" "}
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("terms")}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: PALETTE.blue,
+                    padding: 0,
+                    font: "inherit",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Terms of Use
+                </button>
+                , and I consent to the collection and processing of my registration information.
+              </span>
+            </label>
+
+            {errors.consent && (
+              <div style={{ fontSize:12, color: PALETTE.error, marginTop:-10, marginBottom:12, textAlign:"left", fontFamily: FONT_EN, lineHeight: 1.4 }}>
+                ⚠ {errors.consent}
+              </div>
+            )}
+
             <button disabled={submitting} onClick={handleSubmit} style={{
               width:"100%", padding:"15px 0", borderRadius:16,
               background:`linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
@@ -1351,10 +1419,6 @@ function RegisterPage({ onRegister }) {
                 {submitError}
               </div>
             )}
-
-            <div style={{ textAlign:"center", marginTop:14, fontSize:12, color: PALETTE.secondary }}>
-              بياناتك محفوظة على جهازك فقط 🔒
-            </div>
           </div>
 
           {/* Decorative dots */}
@@ -1482,6 +1546,27 @@ function BackBar({ onBack, title }) {
       </button>
       <div style={{ fontWeight: 700, fontSize: 16, color: PALETTE.text }}>{title}</div>
     </div>
+  );
+}
+
+function InfoPage({ title, children, onBack }) {
+  return (
+    <>
+      <BackBar onBack={onBack} title={title} />
+      <div style={{
+        background: PALETTE.card,
+        border: `1.5px solid ${PALETTE.border}`,
+        borderRadius: 18,
+        padding: "20px 18px",
+        marginTop: 16,
+        boxShadow: "0 6px 18px rgba(31,41,55,0.06)",
+        color: PALETTE.text,
+        fontSize: 14,
+        lineHeight: 1.8,
+      }}>
+        {children}
+      </div>
+    </>
   );
 }
 
@@ -1672,7 +1757,7 @@ function App() {
     return import.meta.env.DEV ? <DeveloperToolsPage /> : null;
   }
 
-  const [view, setView] = useState("register");   // register | splash | home | subtabs | mode | flashcards | avatar | flashResults | quiz | quizAvatar | quizResults
+  const [view, setView] = useState("register");   // register | splash | home | privacy | terms | deleteData | subtabs | mode | flashcards | avatar | flashResults | quiz | quizAvatar | quizResults
   const [user, setUser] = useState(null);
   const [category, setCategory] = useState(null);
   const [subtab, setSubtab] = useState(null);
@@ -1941,7 +2026,7 @@ function App() {
     : [];
 
   if (view === "register") {
-    return <RegisterPage onRegister={(u) => { setUser(u); setView("splash"); }} />;
+    return <RegisterPage onNavigate={setView} onRegister={(u) => { setUser(u); setView("splash"); }} />;
   }
 
   if (view === "splash") {
@@ -2151,7 +2236,101 @@ function App() {
                 </button>
               ))}
             </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
+              <button type="button" onClick={() => setView("privacy")} style={{
+                background: PALETTE.card,
+                border: `1.5px solid ${PALETTE.border}`,
+                borderRadius: 14,
+                padding: "12px 10px",
+                cursor: "pointer",
+                color: PALETTE.text,
+                fontWeight: 700,
+                fontSize: 13,
+                fontFamily: FONT_AR,
+              }}>
+                سياسة الخصوصية
+                <span style={{ display: "block", marginTop: 2, color: PALETTE.secondary, fontSize: 11, fontFamily: FONT_EN }}>
+                  Privacy Policy
+                </span>
+              </button>
+              <button type="button" onClick={() => setView("deleteData")} style={{
+                background: PALETTE.card,
+                border: `1.5px solid ${PALETTE.border}`,
+                borderRadius: 14,
+                padding: "12px 10px",
+                cursor: "pointer",
+                color: PALETTE.text,
+                fontWeight: 700,
+                fontSize: 13,
+                fontFamily: FONT_AR,
+              }}>
+                حذف بياناتي
+                <span style={{ display: "block", marginTop: 2, color: PALETTE.secondary, fontSize: 11, fontFamily: FONT_EN }}>
+                  Delete My Data
+                </span>
+              </button>
+            </div>
           </>
+        )}
+
+        {view === "privacy" && (
+          <InfoPage title="سياسة الخصوصية · Privacy Policy" onBack={() => setView(user ? "home" : "register")}>
+            <p style={{ margin: "0 0 12px" }}>
+              تجمع MedLingo أثناء التسجيل الاسم، الكلية، الجامعة، رقم الهاتف، والنوع.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              تُستخدم هذه البيانات فقط لإتمام التسجيل وتخصيص تجربة التطبيق داخل MedLingo.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              تُخزَّن بيانات التسجيل في جدول بيانات Google Spreadsheet خاص يتحكم فيه مالك التطبيق.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              لا تبيع MedLingo بيانات المستخدمين.
+            </p>
+            <p style={{ margin: 0 }}>
+              MedLingo مخصص للأغراض التعليمية فقط، ولا يُعد نصيحة طبية.
+            </p>
+          </InfoPage>
+        )}
+
+        {view === "terms" && (
+          <InfoPage title="شروط الاستخدام · Terms of Use" onBack={() => setView(user ? "home" : "register")}>
+            <p style={{ margin: "0 0 12px" }}>
+              باستخدام MedLingo، فإنك توافق على استخدام التطبيق لأغراض تعليمية فقط.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              لا يقدم MedLingo نصيحة طبية أو تشخيصًا أو علاجًا، ولا يغني عن الرجوع إلى المختصين.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              يجب استخدام محتوى التطبيق للمذاكرة والتعلم، مع الالتزام بتقديم بيانات تسجيل صحيحة.
+            </p>
+            <p style={{ margin: 0 }}>
+              قد يتم تحديث محتوى التطبيق أو شروط الاستخدام عند الحاجة لتحسين الخدمة.
+            </p>
+          </InfoPage>
+        )}
+
+        {view === "deleteData" && (
+          <InfoPage title="حذف بياناتي · Delete My Data" onBack={() => setView(user ? "home" : "register")}>
+            <p style={{ margin: "0 0 12px" }}>
+              يمكن للمستخدمين طلب حذف بيانات التسجيل الخاصة بهم من MedLingo.
+            </p>
+            <p style={{ margin: "0 0 12px" }}>
+              لإرسال طلب حذف البيانات، تواصل معنا عبر البريد التالي:
+            </p>
+            <div dir="ltr" style={{
+              background: PALETTE.appBg,
+              border: `1px solid ${PALETTE.border}`,
+              borderRadius: 12,
+              padding: "12px 14px",
+              fontFamily: FONT_EN,
+              fontWeight: 700,
+              color: PALETTE.text,
+              textAlign: "center",
+            }}>
+              medlingo.support@example.com
+            </div>
+          </InfoPage>
         )}
 
         {view === "subtabs" && currentCategory && (
