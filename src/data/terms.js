@@ -891,6 +891,7 @@ export const TERMS = {
     ],
     reproductive: [
       { en: "Meiosis", ar: "الانقسام الاختزالي", definition: "The process, molecule, structure, or condition that produces gametes with half the normal chromosome number.", definitionAr: "ينتج أمشاجًا بنصف العدد الطبيعي من الكروموسومات.", example: "Meiosis produces gametes with half the normal chromosome number." },
+      { en: "Mitosis", ar: "الانقسام غير المباشر", definition: "The process, molecule, structure, or condition that produces two identical daughter cells.", definitionAr: "تنتج خليتين بنتين متماثلتين.", example: "Mitosis produces two identical daughter cells." },
       { en: "Spermatogenesis", ar: "تكوّن الحيوانات المنوية", definition: "The production of sperm in the testes.", definitionAr: "إنتاج الحيوانات المنوية في الخصيتين.", example: "Spermatogenesis is the production of sperm in the testes." },
       { en: "Oogenesis", ar: "تكوّن البويضات", definition: "The formation of mature oocytes in the ovary.", definitionAr: "تكوين البويضات الناضجة في المبيض.", example: "Oogenesis is the formation of mature oocytes in the ovary." },
       { en: "Placenta", ar: "المشيمة", definition: "Exchanges nutrients between mother and fetus.", definitionAr: "تبادل المغذيات بين الأم والجنين.", example: "The placenta exchanges nutrients between mother and fetus." },
@@ -1175,16 +1176,16 @@ export const TERMS = {
       { en: "Nissl Body", ar: "جسيم نيسل", definition: "Rough ER clusters in the neuron soma.", definitionAr: "تجمعات من الشبكة الإندوبلازمية الخشنة في جسم الخلية العصبية.", example: "Nissl bodies are rough ER clusters in the neuron soma." },
     ],
     muscular: [
+      { en: "Skeletal Muscle", ar: "عضلة هيكلية", definition: "Striated and voluntary muscle attached to bones.", definitionAr: "عضلة مخططة وإرادية ترتبط بالعظام.", example: "Skeletal muscle is striated and voluntary." },
+      { en: "Cardiac Muscle", ar: "عضلة قلبية", definition: "Striated and involuntary.", definitionAr: "مخططة ولا إرادية.", example: "Cardiac muscle is striated and involuntary." },
+      { en: "Smooth Muscle", ar: "عضلة ملساء", definition: "The process, molecule, structure, or condition that lines hollow organs like the GIT and bladder.", definitionAr: "يبطن الأعضاء المجوفة مثل الجهاز الهضمي والمثانة.", example: "Smooth muscle lines hollow organs like the GIT and bladder." },
       { en: "Sarcomere", ar: "الساركومير", definition: "The basic contractile unit of muscle.", definitionAr: "الوحدة الانقباضية الأساسية في العضلة.", example: "The sarcomere is the basic contractile unit of muscle." },
       { en: "Myofibril", ar: "الليف العضلي", definition: "A cell, tissue feature, or structure that contain the contractile proteins actin and myosin.", definitionAr: "تحتوي على البروتينات الانقباضية أكتين وميوسين.", example: "Myofibrils contain the contractile proteins actin and myosin." },
-      { en: "Smooth Muscle", ar: "عضلة ملساء", definition: "The process, molecule, structure, or condition that lines hollow organs like the GIT and bladder.", definitionAr: "يبطن الأعضاء المجوفة مثل الجهاز الهضمي والمثانة.", example: "Smooth muscle lines hollow organs like the GIT and bladder." },
-      { en: "Cardiac Muscle", ar: "عضلة قلبية", definition: "Striated and involuntary.", definitionAr: "مخططة ولا إرادية.", example: "Cardiac muscle is striated and involuntary." },
       { en: "Intercalated Disc", ar: "قرص متخلل", definition: "A cell, tissue feature, or structure that connect cardiac muscle cells electrically.", definitionAr: "تربط خلايا عضلة القلب كهربائيًا.", example: "Intercalated discs connect cardiac muscle cells electrically." },
       { en: "Actin", ar: "أكتين", definition: "The thin filament in muscle sarcomeres.", definitionAr: "الخيط الرفيع في ساركوميرات العضلة.", example: "Actin is the thin filament in muscle sarcomeres." },
       { en: "Myosin", ar: "ميوسين", definition: "The thick filament that pulls actin during contraction.", definitionAr: "الخيط السميك الذي يسحب الأكتين أثناء الانقباض.", example: "Myosin is the thick filament that pulls actin during contraction." },
       { en: "T-Tubule", ar: "الأنبوب T", definition: "A cell, tissue feature, or structure that transmit action potentials deep into muscle fibers.", definitionAr: "تنقل جهود الفعل إلى عمق ألياف العضلات.", example: "T-tubules transmit action potentials deep into muscle fibers." },
       { en: "Sarcoplasmic Reticulum", ar: "الشبكة الساركوبلازمية", definition: "Stores and releases calcium for contraction.", definitionAr: "يخزن الكالسيوم ويطلقه للانقباض.", example: "The sarcoplasmic reticulum stores and releases calcium for contraction." },
-      { en: "Mitosis", ar: "الانقسام غير المباشر", definition: "The process, molecule, structure, or condition that produces two identical daughter cells.", definitionAr: "تنتج خليتين بنتين متماثلتين.", example: "Mitosis produces two identical daughter cells." },
     ],
   },
   organs: {

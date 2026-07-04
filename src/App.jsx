@@ -14,7 +14,6 @@ const PALETTE = {
   secondary: "#6B7280",
   border: "#D6E4F0",
 };
-
 function containsArabic(text = "") {
   return /[\u0600-\u06FF]/.test(text);
 }
@@ -34,19 +33,6 @@ function playSoundEffect(fileName, muted = false) {
     return Promise.resolve(true);
   } catch {
     // Sound effects are optional; missing files should never interrupt learning.
-    return Promise.resolve(false);
-  }
-}
-
-function playPreparedSound(audio, muted = false) {
-  if (muted || !audio) return Promise.resolve(false);
-
-  try {
-    audio.currentTime = 0;
-    const playPromise = audio.play();
-    if (playPromise?.then) return playPromise.then(() => true).catch(() => false);
-    return Promise.resolve(true);
-  } catch {
     return Promise.resolve(false);
   }
 }
@@ -988,6 +974,7 @@ function Quiz({ terms, onFinish, onSound }) {
 const AVATARS = [
   {
     name: "Sara",
+    gender: "female",
     mood: "excited",
     svg: (
       <svg viewBox="0 0 120 160" width="120" height="160" xmlns="http://www.w3.org/2000/svg">
@@ -1030,6 +1017,7 @@ const AVATARS = [
   },
   {
     name: "Omar",
+    gender: "male",
     mood: "focused",
     svg: (
       <svg viewBox="0 0 120 160" width="120" height="160" xmlns="http://www.w3.org/2000/svg">
@@ -1073,6 +1061,7 @@ const AVATARS = [
   },
   {
     name: "Layla",
+    gender: "female",
     mood: "cheerful",
     svg: (
       <svg viewBox="0 0 120 160" width="120" height="160" xmlns="http://www.w3.org/2000/svg">
@@ -1121,6 +1110,7 @@ const AVATARS = [
   },
   {
     name: "Karim",
+    gender: "male",
     mood: "confident",
     svg: (
       <svg viewBox="0 0 120 160" width="120" height="160" xmlns="http://www.w3.org/2000/svg">
@@ -1164,8 +1154,8 @@ const AVATARS = [
 
 
 // ── Registration Page ────────────────────────────────────────────────────────
-function RegisterPage({ onRegister, onFirstInteraction }) {
-  const [form, setForm] = useState({ name: "", college: "", university: "", phone: "" });
+function RegisterPage({ onRegister }) {
+  const [form, setForm] = useState({ name: "", college: "", university: "", phone: "", gender: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -1183,6 +1173,7 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
     const phoneDigits = phoneValue.startsWith("+") ? phoneValue.slice(1) : phoneValue;
     if (!phoneValue) e.phone = "رقم الهاتف مطلوب";
     else if (!/^\d+$/.test(phoneDigits) || phoneDigits.length < 7) e.phone = "Please enter a valid phone number.";
+    if (!form.gender) e.gender = "اختار النوع";
     return e;
   }
 
@@ -1196,7 +1187,10 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
     const registrationData = {
       ...form,
       name: form.name.trim(),
+      college: form.college.trim(),
+      university: form.university.trim(),
       phone: form.phone.trim(),
+      gender: form.gender,
     };
 
     try {
@@ -1208,7 +1202,7 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
 
       setSubmitMessage("Registration completed successfully.");
       setSubmitted(true);
-      setForm({ name: "", college: "", university: "", phone: "" });
+      setForm({ name: "", college: "", university: "", phone: "", gender: "" });
       try { localStorage.setItem("medlingo_user", JSON.stringify(registrationData)); } catch {}
       setTimeout(() => onRegister(registrationData), 1200);
     } catch {
@@ -1298,7 +1292,49 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
             {renderField({ id: "university", label: "الجامعة", labelEn: "University", placeholder: "مثال: جامعة القاهرة", icon: "🎓" })}
             {renderField({ id: "phone", label: "رقم الهاتف", labelEn: "Phone Number", placeholder: "+20 10XXXXXXXX", type: "tel", icon: "📱" })}
 
-            <button disabled={submitting} onClick={() => { onFirstInteraction?.(); handleSubmit(); }} style={{
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                <span style={{ fontSize:13, color: GOLD, fontWeight:700 }}>👤 النوع</span>
+                <span style={{ fontSize:11, color:"#9fb4d4", fontFamily: FONT_EN }}>Gender</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {[
+                  { value: "male", label: "ولد", labelEn: "Male" },
+                  { value: "female", label: "بنت", labelEn: "Female" },
+                ].map(option => {
+                  const selected = form.gender === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => { setForm(f => ({ ...f, gender: option.value })); setErrors(er => ({ ...er, gender: null })); }}
+                      style={{
+                        border: selected ? `2px solid ${PALETTE.primary}` : errors.gender ? `2px solid ${PALETTE.error}` : `1.5px solid ${PALETTE.border}`,
+                        background: selected ? "#DCFCE7" : PALETTE.card,
+                        color: selected ? PALETTE.success : PALETTE.text,
+                        borderRadius: 14,
+                        padding: "11px 12px",
+                        cursor: "pointer",
+                        fontFamily: FONT_AR,
+                        fontWeight: 800,
+                      }}
+                    >
+                      <span>{option.label}</span>
+                      <span style={{ display: "block", marginTop: 2, fontSize: 11, color: PALETTE.secondary, fontFamily: FONT_EN }}>
+                        {option.labelEn}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.gender && (
+                <div style={{ fontSize:12, color: PALETTE.error, marginTop:4, textAlign:"right" }}>
+                  ⚠ {errors.gender}
+                </div>
+              )}
+            </div>
+
+            <button disabled={submitting} onClick={handleSubmit} style={{
               width:"100%", padding:"15px 0", borderRadius:16,
               background:`linear-gradient(90deg, ${PALETTE.primary}, ${PALETTE.blue})`,
               border:"none", color: DARK, fontWeight:900, fontSize:17,
@@ -1334,8 +1370,12 @@ function RegisterPage({ onRegister, onFirstInteraction }) {
 }
 
 // ── Between-Session Avatar Screen ────────────────────────────────────────────
-function AvatarTransition({ onContinue, message }) {
-  const [avatar] = useState(() => AVATARS[Math.floor(Math.random() * AVATARS.length)]);
+function AvatarTransition({ onContinue, message, user }) {
+  const [avatar] = useState(() => {
+    const genderAvatars = user?.gender ? AVATARS.filter(avatar => avatar.gender === user.gender) : [];
+    const avatarPool = genderAvatars.length ? genderAvatars : AVATARS;
+    return avatarPool[Math.floor(Math.random() * avatarPool.length)];
+  });
   const [bounce, setBounce] = useState(false);
 
   useEffect(() => {
@@ -1650,17 +1690,10 @@ function App() {
       return false;
     }
   });
-  const [welcomePlayed, setWelcomePlayed] = useState(() => {
-    try {
-      return sessionStorage.getItem("medlingo_welcome_played") === "1";
-    } catch {
-      return false;
-    }
-  });
   const appHistoryRef = useRef([]);
-  const welcomeAudioRef = useRef(null);
-  const welcomeAutoplayTriedRef = useRef(false);
-  const welcomePlayedRef = useRef(welcomePlayed);
+  const splashAudioPlayedRef = useRef(false);
+  const splashAudioRef = useRef(null);
+  const splashAudioNeedsInteractionRef = useRef(false);
 
   // On mount: check if user already registered
   useEffect(() => {
@@ -1693,18 +1726,33 @@ function App() {
   }, [view]);
 
   useEffect(() => {
-    if (welcomePlayed || typeof Audio === "undefined") return;
+    if (view !== "splash") {
+      splashAudioPlayedRef.current = false;
+      splashAudioNeedsInteractionRef.current = false;
+      if (splashAudioRef.current) {
+        splashAudioRef.current.pause();
+        splashAudioRef.current = null;
+      }
+      return;
+    }
+    if (splashAudioPlayedRef.current) return;
+
+    splashAudioPlayedRef.current = true;
+    if (typeof Audio === "undefined") return;
 
     try {
-      const audio = new Audio("/sounds/welcome.mp3");
-      audio.preload = "auto";
-      audio.volume = 0.25;
-      audio.load();
-      welcomeAudioRef.current = audio;
-    } catch {
-      welcomeAudioRef.current = null;
-    }
-  }, [welcomePlayed]);
+      const startupAudio = new Audio("/sounds/medlingo-startup-v2.mp3");
+      startupAudio.loop = false;
+      startupAudio.volume = 0.7;
+      splashAudioRef.current = startupAudio;
+      splashAudioNeedsInteractionRef.current = true;
+      startupAudio.play()
+        .then(() => {
+          splashAudioNeedsInteractionRef.current = false;
+        })
+        .catch(() => {});
+    } catch {}
+  }, [view]);
 
   useEffect(() => {
     try {
@@ -1722,29 +1770,6 @@ function App() {
     window.addEventListener("popstate", handleBrowserBack);
     return () => window.removeEventListener("popstate", handleBrowserBack);
   }, []);
-
-  useEffect(() => {
-    if (welcomePlayed) return;
-
-    function handleFirstInteraction() {
-      playWelcomeOnce();
-    }
-
-    window.addEventListener("pointerdown", handleFirstInteraction, { once: true, capture: true });
-    window.addEventListener("keydown", handleFirstInteraction, { once: true, capture: true });
-    return () => {
-      window.removeEventListener("pointerdown", handleFirstInteraction, { capture: true });
-      window.removeEventListener("keydown", handleFirstInteraction, { capture: true });
-    };
-  }, [welcomePlayed, soundMuted]);
-
-  useEffect(() => {
-    if (welcomePlayed || welcomeAutoplayTriedRef.current) return;
-    if (view !== "splash" && view !== "home") return;
-
-    welcomeAutoplayTriedRef.current = true;
-    playWelcomeOnce({ markOnlyOnSuccess: true });
-  }, [view, welcomePlayed, soundMuted]);
 
   function openCategory(catId) {
     setCategory(catId);
@@ -1790,14 +1815,23 @@ function App() {
     playSoundEffect(fileName, soundMuted);
   }
 
+  function playSplashAudioFromInteraction() {
+    if (!splashAudioNeedsInteractionRef.current || !splashAudioRef.current) return;
+    splashAudioNeedsInteractionRef.current = false;
+    splashAudioRef.current.play().catch(() => {});
+  }
+
   function resetRegistration() {
     try {
       localStorage.removeItem("medlingo_user");
-      sessionStorage.removeItem("medlingo_welcome_played");
     } catch {}
     appHistoryRef.current = [];
-    welcomePlayedRef.current = false;
-    welcomeAutoplayTriedRef.current = false;
+    splashAudioPlayedRef.current = false;
+    splashAudioNeedsInteractionRef.current = false;
+    if (splashAudioRef.current) {
+      splashAudioRef.current.pause();
+      splashAudioRef.current = null;
+    }
     setUser(null);
     setCategory(null);
     setSubtab(null);
@@ -1806,30 +1840,7 @@ function App() {
     setKnownCount(0);
     setQuizScore(0);
     setSearchQuery("");
-    setWelcomePlayed(false);
     setView("register");
-  }
-
-  function markWelcomePlayed() {
-    welcomePlayedRef.current = true;
-    setWelcomePlayed(true);
-    try {
-      sessionStorage.setItem("medlingo_welcome_played", "1");
-    } catch {}
-  }
-
-  async function playWelcomeOnce({ markOnlyOnSuccess = false } = {}) {
-    if (welcomePlayedRef.current) return;
-    if (soundMuted) {
-      markWelcomePlayed();
-      return;
-    }
-
-    const played = welcomeAudioRef.current
-      ? await playPreparedSound(welcomeAudioRef.current, soundMuted)
-      : await playSoundEffect("welcome.mp3", soundMuted);
-
-    if (played || !markOnlyOnSuccess) markWelcomePlayed();
   }
 
   function getAppSnapshot() {
@@ -1910,6 +1921,7 @@ function App() {
   const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
   const showResetRegistration = import.meta.env.DEV || window.location.hostname === "localhost";
+  const firstName = user?.name?.trim().split(/\s+/)[0];
   const visibleCategories = CATEGORIES.filter(cat => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
@@ -1929,12 +1941,12 @@ function App() {
     : [];
 
   if (view === "register") {
-    return <RegisterPage onFirstInteraction={playWelcomeOnce} onRegister={(u) => { setUser(u); setView("splash"); }} />;
+    return <RegisterPage onRegister={(u) => { setUser(u); setView("splash"); }} />;
   }
 
   if (view === "splash") {
     return (
-      <div onClick={() => { playWelcomeOnce(); setView("home"); }} style={{
+      <div onPointerDown={playSplashAudioFromInteraction} onClick={() => setView("home")} style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         background: PALETTE.appBg,
@@ -2007,7 +2019,7 @@ function App() {
   }
 
   return (
-    <div dir="rtl" onPointerDownCapture={playWelcomeOnce} style={{
+    <div dir="rtl" style={{
       minHeight: "100vh",
       background: PALETTE.appBg,
       fontFamily: FONT_AR,
@@ -2029,7 +2041,7 @@ function App() {
           </div>
           <div>
             <div style={{ fontWeight: 600, fontSize: 20, color: PALETTE.text, fontFamily: FONT_EN }}>MedLingo</div>
-            {user && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {user.name.split(" ")[0]} 👋</div>}
+            {firstName && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {firstName} 👋</div>}
           </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -2215,6 +2227,7 @@ function App() {
 
         {view === "avatar" && (
           <AvatarTransition
+            user={user}
             onContinue={() => setView("flashResults")}
             message={`راجعت ${queue.length} مصطلح — عرفت ${knownCount} منهم 🎉`}
           />
@@ -2240,6 +2253,7 @@ function App() {
 
         {view === "quizAvatar" && (
           <AvatarTransition
+            user={user}
             onContinue={() => setView("quizResults")}
             message={`نتيجتك: ${quizScore} من ${activeQuizQuestionCount} ⭐`}
           />
