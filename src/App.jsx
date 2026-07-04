@@ -1170,15 +1170,52 @@ function RegisterPage({ onRegister, onNavigate, savedUser }) {
   const GOLD = PALETTE.primary;
   const DARK = PALETTE.text;
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5W0GcbZVefOZlJGOc4McqIitSjdQlbwMonWgAa4dA2INfDRbdmWM10YApdLjbE9Twvw/exec";
+  const EGYPTIAN_LOCAL_PHONE_PATTERN = /^\d{11}$/;
+  const INTERNATIONAL_PHONE_PATTERN = /^\+\d{8,15}$/;
+
+  function normalizePhone(value) {
+    return value.trim().replace(/[\s\-()]/g, "");
+  }
+
+  function getPhoneDuplicateKey(phone) {
+    const normalizedPhone = normalizePhone(phone);
+    const egyptInternationalMatch = normalizedPhone.match(/^\+20(1\d{9})$/);
+    return egyptInternationalMatch ? `0${egyptInternationalMatch[1]}` : normalizedPhone;
+  }
+
+  function getRegisteredPhoneKeys() {
+    try {
+      const savedPhones = JSON.parse(localStorage.getItem("medlingo_registered_phones") || "[]");
+      const savedUser = JSON.parse(localStorage.getItem("medlingo_user") || "null");
+      const phoneKeys = Array.isArray(savedPhones) ? savedPhones : [];
+      if (savedUser?.phone) phoneKeys.push(getPhoneDuplicateKey(savedUser.phone));
+      return [...new Set(phoneKeys)];
+    } catch {
+      return [];
+    }
+  }
+
+  function getTrimmedFormValues() {
+    return {
+      name: form.name.trim(),
+      college: form.college.trim(),
+      university: form.university.trim(),
+      phone: normalizePhone(form.phone),
+      gender: form.gender,
+    };
+  }
 
   function validate() {
     const e = {};
-    if (!form.name.trim())       e.name       = "الاسم مطلوب";
-    const phoneValue = form.phone.trim();
-    const phoneDigits = phoneValue.startsWith("+") ? phoneValue.slice(1) : phoneValue;
-    if (!phoneValue) e.phone = "رقم الهاتف مطلوب";
-    else if (!/^\d+$/.test(phoneDigits) || phoneDigits.length < 7) e.phone = "Please enter a valid phone number.";
-    if (!form.gender) e.gender = "اختار النوع";
+    const hasLetter = value => /[A-Za-z\u0600-\u06FF]/.test(value);
+    const values = getTrimmedFormValues();
+
+    if (values.name.length < 2 || !hasLetter(values.name)) e.name = "Please enter your full name.";
+    if (!values.college || !hasLetter(values.college)) e.college = "Please enter your college.";
+    if (!values.university || !hasLetter(values.university)) e.university = "Please enter your university.";
+    if (!EGYPTIAN_LOCAL_PHONE_PATTERN.test(values.phone) && !INTERNATIONAL_PHONE_PATTERN.test(values.phone)) e.phone = "Please enter a valid phone number.";
+    else if (getRegisteredPhoneKeys().includes(getPhoneDuplicateKey(values.phone))) e.phone = "This phone number is already registered on this device.";
+    if (!values.gender) e.gender = "Please select your gender.";
     if (!consentAccepted) e.consent = "Please accept the Privacy Policy and Terms of Use to continue.";
     return e;
   }
@@ -1190,14 +1227,7 @@ function RegisterPage({ onRegister, onNavigate, savedUser }) {
     setSubmitting(true);
     setSubmitError("");
 
-    const registrationData = {
-      ...form,
-      name: form.name.trim(),
-      college: form.college.trim(),
-      university: form.university.trim(),
-      phone: form.phone.trim(),
-      gender: form.gender,
-    };
+    const registrationData = getTrimmedFormValues();
 
     try {
       await fetch(WEB_APP_URL, {
@@ -1214,6 +1244,7 @@ function RegisterPage({ onRegister, onNavigate, savedUser }) {
         localStorage.setItem("medlingo_user", JSON.stringify(registrationData));
         localStorage.setItem("medlingo_consent", "true");
         localStorage.setItem("medlingo_session_active", "true");
+        localStorage.setItem("medlingo_registered_phones", JSON.stringify([...new Set(getRegisteredPhoneKeys().concat(getPhoneDuplicateKey(registrationData.phone)))]));
       } catch {}
       setTimeout(() => onRegister(registrationData), 1200);
     } catch {
