@@ -1158,7 +1158,7 @@ const AVATARS = [
 
 
 // ── Registration Page ────────────────────────────────────────────────────────
-function RegisterPage({ onRegister, onNavigate }) {
+function RegisterPage({ onRegister, onNavigate, savedUser }) {
   const [form, setForm] = useState({ name: "", college: "", university: "", phone: "", gender: "" });
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [errors, setErrors] = useState({});
@@ -1213,6 +1213,7 @@ function RegisterPage({ onRegister, onNavigate }) {
       try {
         localStorage.setItem("medlingo_user", JSON.stringify(registrationData));
         localStorage.setItem("medlingo_consent", "true");
+        localStorage.setItem("medlingo_session_active", "true");
       } catch {}
       setTimeout(() => onRegister(registrationData), 1200);
     } catch {
@@ -1297,6 +1298,26 @@ function RegisterPage({ onRegister, onNavigate }) {
             borderRadius:24, padding:"28px 24px",
             backdropFilter:"blur(8px)",
           }}>
+            {savedUser && (
+              <button type="button" onClick={() => onRegister(savedUser)} style={{
+                width:"100%",
+                padding:"13px 0",
+                borderRadius:14,
+                background: PALETTE.card,
+                border:`1.5px solid ${PALETTE.border}`,
+                color: PALETTE.text,
+                fontWeight:800,
+                fontSize:14,
+                cursor:"pointer",
+                marginBottom:18,
+                fontFamily: FONT_AR,
+              }}>
+                متابعة كـ {savedUser.name?.split(" ")[0] || "MedLingo"}
+                <span style={{ display: "block", marginTop: 2, color: PALETTE.secondary, fontSize: 11, fontFamily: FONT_EN }}>
+                  Continue with saved registration
+                </span>
+              </button>
+            )}
             {renderField({ id: "name", label: "الاسم الكامل", labelEn: "Full Name", placeholder: "اكتب اسمك هنا", icon: "👤" })}
             {renderField({ id: "college", label: "الكلية", labelEn: "College", placeholder: "مثال: كلية الطب", icon: "🏛️" })}
             {renderField({ id: "university", label: "الجامعة", labelEn: "University", placeholder: "مثال: جامعة القاهرة", icon: "🎓" })}
@@ -1788,10 +1809,12 @@ function App() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("medlingo_user");
-      if (saved) {
+      const activeSession = localStorage.getItem("medlingo_session_active") !== "false";
+      if (saved && activeSession) {
         setUser(JSON.parse(saved));
         setView("splash");
       } else {
+        if (saved) setUser(JSON.parse(saved));
         setView("register");
       }
     } catch { setView("register"); }
@@ -1910,10 +1933,7 @@ function App() {
     splashAudioRef.current.play().catch(() => {});
   }
 
-  function resetRegistration() {
-    try {
-      localStorage.removeItem("medlingo_user");
-    } catch {}
+  function clearActiveAppState({ keepUser = false } = {}) {
     appHistoryRef.current = [];
     splashAudioPlayedRef.current = false;
     splashAudioNeedsInteractionRef.current = false;
@@ -1921,7 +1941,7 @@ function App() {
       splashAudioRef.current.pause();
       splashAudioRef.current = null;
     }
-    setUser(null);
+    if (!keepUser) setUser(null);
     setCategory(null);
     setSubtab(null);
     setQueue([]);
@@ -1930,6 +1950,26 @@ function App() {
     setQuizScore(0);
     setSearchQuery("");
     setView("register");
+  }
+
+  function logout() {
+    try {
+      localStorage.setItem("medlingo_session_active", "false");
+    } catch {}
+    clearActiveAppState({ keepUser: true });
+  }
+
+  function resetRegistration() {
+    if (!window.confirm("Are you sure you want to reset your registration on this device?")) return;
+    try {
+      Object.keys(localStorage)
+        .filter(key => key.startsWith("medlingo_") && key !== "medlingo_sound_muted")
+        .forEach(key => localStorage.removeItem(key));
+      localStorage.removeItem("medlingo_user");
+      localStorage.removeItem("medlingo_consent");
+      localStorage.removeItem("medlingo_session_active");
+    } catch {}
+    clearActiveAppState();
   }
 
   function getAppSnapshot() {
@@ -2009,7 +2049,6 @@ function App() {
   const activeTerms = category && subtab ? getTermsForSubtab(category, subtab) : [];
   const isInteractiveMode = INTERACTIVE_CATEGORIES.has(category);
   const activeQuizQuestionCount = getQuizQuestionCount(activeTerms);
-  const showResetRegistration = import.meta.env.DEV || window.location.hostname === "localhost";
   const firstName = user?.name?.trim().split(/\s+/)[0];
   const visibleCategories = CATEGORIES.filter(cat => {
     const q = searchQuery.trim().toLowerCase();
@@ -2030,7 +2069,17 @@ function App() {
     : [];
 
   if (view === "register") {
-    return <RegisterPage onNavigate={setView} onRegister={(u) => { setUser(u); setView("splash"); }} />;
+    return (
+      <RegisterPage
+        savedUser={user}
+        onNavigate={setView}
+        onRegister={(u) => {
+          try { localStorage.setItem("medlingo_session_active", "true"); } catch {}
+          setUser(u);
+          setView("splash");
+        }}
+      />
+    );
   }
 
   if (view === "splash") {
@@ -2133,26 +2182,41 @@ function App() {
             {firstName && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {firstName} 👋</div>}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          {showResetRegistration && (
-            <button
-              type="button"
-              onClick={resetRegistration}
-              style={{
-                background: PALETTE.card,
-                color: PALETTE.secondary,
-                border: `1px solid ${PALETTE.border}`,
-                borderRadius: 12,
-                padding: "6px 10px",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_EN,
-              }}
-            >
-              Reset Registration
-            </button>
-          )}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            onClick={logout}
+            style={{
+              background: PALETTE.card,
+              color: PALETTE.secondary,
+              border: `1px solid ${PALETTE.border}`,
+              borderRadius: 12,
+              padding: "6px 10px",
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_EN,
+            }}
+          >
+            Logout
+          </button>
+          <button
+            type="button"
+            onClick={resetRegistration}
+            style={{
+              background: PALETTE.card,
+              color: PALETTE.secondary,
+              border: `1px solid ${PALETTE.border}`,
+              borderRadius: 12,
+              padding: "6px 10px",
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_EN,
+            }}
+          >
+            Reset Registration
+          </button>
           <button
             type="button"
             onClick={() => setSoundMuted(muted => !muted)}
