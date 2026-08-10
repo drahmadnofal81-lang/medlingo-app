@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import { TextToSpeech } from "@capacitor-community/text-to-speech";
 import { TERMS } from "./data/terms";
 
 const FONT_EN = "'Inter', sans-serif";
@@ -23,32 +25,84 @@ function getDefinitionText(term) {
 }
 
 function playSoundEffect(fileName, muted = false) {
-  if (muted || typeof Audio === "undefined") return Promise.resolve(false);
+  console.log("[Sound] playSoundEffect fired", { fileName, muted });
+  if (muted || typeof Audio === "undefined") {
+    console.log("[Sound] playSoundEffect skipped: muted or Audio unavailable", { fileName, muted, audioDefined: typeof Audio !== "undefined" });
+    return Promise.resolve(false);
+  }
 
   try {
-    const audio = new Audio(`/sounds/${fileName}`);
+    const audio = new Audio(`sounds/${fileName}`);
     audio.volume = 0.25;
+    console.log("[Sound] audio created", {
+      src: audio.src,
+      currentSrc: audio.currentSrc,
+      readyState: audio.readyState,
+      volume: audio.volume,
+      muted: audio.muted,
+    });
     const playPromise = audio.play();
-    if (playPromise?.then) return playPromise.then(() => true).catch(() => false);
+    console.log("[Sound] audio.play() called", { fileName, playPromiseType: typeof playPromise });
+    if (playPromise?.then) {
+      return playPromise
+        .then(() => {
+          console.log("[Sound] play resolved", { fileName, currentSrc: audio.currentSrc });
+          return true;
+        })
+        .catch((error) => {
+          console.log("[Sound] play rejected", {
+            fileName,
+            name: error?.name,
+            message: error?.message,
+            error,
+            currentSrc: audio.currentSrc,
+            readyState: audio.readyState,
+            volume: audio.volume,
+            muted: audio.muted,
+          });
+          return false;
+        });
+    }
     return Promise.resolve(true);
-  } catch {
-    // Sound effects are optional; missing files should never interrupt learning.
+  } catch (error) {
+    console.log("[Sound] playSoundEffect exception", { fileName, error });
     return Promise.resolve(false);
   }
 }
 
-function pronounceEnglishTerm(term) {
-  if (!term || typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") return;
+async function pronounceEnglishTerm(term) {
+  if (!term) return;
+
+  const options = {
+    text: term,
+    lang: "en-US",
+    rate: 0.9,
+    pitch: 1,
+    volume: 1,
+  };
 
   try {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(term);
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
-  } catch {}
+    await TextToSpeech.speak(options);
+    console.log("[TTS] spoke via Capacitor TextToSpeech", { term, options });
+  } catch (error) {
+    console.log("[TTS] Capacitor TextToSpeech failed, falling back to browser speechSynthesis", { term, error });
+    try {
+      if (typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
+        console.log("[TTS] browser speechSynthesis unavailable", { term });
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(term);
+      utterance.lang = "en-US";
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      window.speechSynthesis.speak(utterance);
+      console.log("[TTS] spoke via browser speechSynthesis", { term });
+    } catch (fallbackError) {
+      console.log("[TTS] browser fallback failed", { term, fallbackError });
+    }
+  }
 }
 
 function PronounceButton({ term, size = 20, as = "button" }) {
@@ -1527,7 +1581,7 @@ function AvatarTransition({ onContinue, message, user }) {
         borderRadius: 20, padding: "4px 16px", fontSize: 13, fontWeight: 800,
         marginBottom: 20, letterSpacing: 1,
       }}>
-        {avatar.name}
+        {user?.name?.trim().split(/\s+/)[0] || "MedLingo"}
       </div>
 
       {/* Message bubble */}
@@ -1861,20 +1915,43 @@ function App() {
     if (splashAudioPlayedRef.current) return;
 
     splashAudioPlayedRef.current = true;
-    if (typeof Audio === "undefined") return;
+    if (typeof Audio === "undefined") {
+      console.log("[Sound] splash startup audio skipped: Audio unavailable");
+      return;
+    }
 
     try {
-      const startupAudio = new Audio("/sounds/medlingo-startup-v2.mp3");
+      const startupAudio = new Audio("sounds/medlingo-startup-v2.mp3");
       startupAudio.loop = false;
       startupAudio.volume = 0.7;
       splashAudioRef.current = startupAudio;
       splashAudioNeedsInteractionRef.current = true;
+      console.log("[Sound] splash audio created", {
+        src: startupAudio.src,
+        currentSrc: startupAudio.currentSrc,
+        readyState: startupAudio.readyState,
+        volume: startupAudio.volume,
+        muted: startupAudio.muted,
+      });
       startupAudio.play()
         .then(() => {
           splashAudioNeedsInteractionRef.current = false;
+          console.log("[Sound] splash audio play resolved", { currentSrc: startupAudio.currentSrc });
         })
-        .catch(() => {});
-    } catch {}
+        .catch((error) => {
+          console.log("[Sound] splash audio play rejected", {
+            name: error?.name,
+            message: error?.message,
+            error,
+            currentSrc: startupAudio.currentSrc,
+            readyState: startupAudio.readyState,
+            volume: startupAudio.volume,
+            muted: startupAudio.muted,
+          });
+        });
+    } catch (error) {
+      console.log("[Sound] splash audio exception", { error });
+    }
   }, [view]);
 
   useEffect(() => {
@@ -1893,6 +1970,32 @@ function App() {
     window.addEventListener("popstate", handleBrowserBack);
     return () => window.removeEventListener("popstate", handleBrowserBack);
   }, []);
+
+  useEffect(() => {
+    let removeBackListener = null;
+    try {
+      const listener = CapacitorApp.addListener("backButton", () => {
+        const previousState = appHistoryRef.current.pop();
+        if (previousState) {
+          restoreAppState(previousState);
+          return;
+        }
+
+        if (view === "home" || view === "register" || view === "splash") {
+          CapacitorApp.exitApp();
+          return;
+        }
+
+        window.history.back();
+      });
+      removeBackListener = () => listener.remove();
+    } catch {
+      // Capacitor App plugin may not be available in non-native environments.
+    }
+    return () => {
+      if (removeBackListener) removeBackListener();
+    };
+  }, [view]);
 
   function openCategory(catId) {
     setCategory(catId);
@@ -1939,9 +2042,32 @@ function App() {
   }
 
   function playSplashAudioFromInteraction() {
+    console.log("[Sound] playSplashAudioFromInteraction fired", {
+      needsInteraction: splashAudioNeedsInteractionRef.current,
+      audioExists: !!splashAudioRef.current,
+    });
     if (!splashAudioNeedsInteractionRef.current || !splashAudioRef.current) return;
     splashAudioNeedsInteractionRef.current = false;
-    splashAudioRef.current.play().catch(() => {});
+    splashAudioRef.current.play()
+      .then(() => {
+        console.log("[Sound] splash interaction play resolved", {
+          currentSrc: splashAudioRef.current?.currentSrc,
+          readyState: splashAudioRef.current?.readyState,
+          volume: splashAudioRef.current?.volume,
+          muted: splashAudioRef.current?.muted,
+        });
+      })
+      .catch((error) => {
+        console.log("[Sound] splash interaction play rejected", {
+          name: error?.name,
+          message: error?.message,
+          error,
+          currentSrc: splashAudioRef.current?.currentSrc,
+          readyState: splashAudioRef.current?.readyState,
+          volume: splashAudioRef.current?.volume,
+          muted: splashAudioRef.current?.muted,
+        });
+      });
   }
 
   function clearActiveAppState({ keepUser = false } = {}) {
