@@ -1,2 +1,7 @@
 node_modules
 dist
+# Android signing files
+*.jks
+*.keystore
+key.properties
+signing.properties
