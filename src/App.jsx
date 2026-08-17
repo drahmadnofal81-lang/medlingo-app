@@ -1846,7 +1846,7 @@ function App() {
     return import.meta.env.DEV ? <DeveloperToolsPage /> : null;
   }
 
-  const [view, setView] = useState("register");   // register | splash | home | privacy | terms | deleteData | subtabs | mode | flashcards | avatar | flashResults | quiz | quizAvatar | quizResults
+  const [view, setView] = useState("register");   // register | splash | academyIntro | home | privacy | terms | deleteData | subtabs | mode | flashcards | avatar | flashResults | quiz | quizAvatar | quizResults
   const [user, setUser] = useState(null);
   const [category, setCategory] = useState(null);
   const [subtab, setSubtab] = useState(null);
@@ -1898,12 +1898,18 @@ function App() {
 
   useEffect(() => {
     if (view !== "splash") return;
-    const timer = setTimeout(() => setView("home"), 3500);
+    const timer = setTimeout(() => setView("academyIntro"), 3500);
     return () => clearTimeout(timer);
   }, [view]);
 
   useEffect(() => {
-    if (view !== "splash") {
+    if (view !== "academyIntro") return;
+    const timer = setTimeout(() => setView("home"), 2000);
+    return () => clearTimeout(timer);
+  }, [view]);
+
+  useEffect(() => {
+    if (view !== "splash" && view !== "academyIntro") {
       splashAudioPlayedRef.current = false;
       splashAudioNeedsInteractionRef.current = false;
       if (splashAudioRef.current) {
@@ -1981,7 +1987,7 @@ function App() {
           return;
         }
 
-        if (view === "home" || view === "register" || view === "splash") {
+        if (view === "home" || view === "register" || view === "splash" || view === "academyIntro") {
           CapacitorApp.exitApp();
           return;
         }
@@ -2235,7 +2241,7 @@ function App() {
 
   if (view === "splash") {
     return (
-      <div onPointerDown={playSplashAudioFromInteraction} onClick={() => setView("home")} style={{
+      <div onPointerDown={playSplashAudioFromInteraction} onClick={() => setView("academyIntro")} style={{
         minHeight: "100vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         background: PALETTE.appBg,
@@ -2307,6 +2313,60 @@ function App() {
     );
   }
 
+  if (view === "academyIntro") {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 18,
+        background: PALETTE.appBg,
+        padding: 24,
+        boxSizing: "border-box",
+        animation: "academyIntroFade 2000ms ease-in-out both",
+      }}>
+        <style>{`
+          @keyframes academyIntroFade {
+            0% { opacity: 0; transform: scale(0.96); }
+            22.5% { opacity: 1; transform: scale(1); }
+            72.5% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1); }
+          }
+        `}</style>
+        <img
+          src={ACADEMY_LOGO}
+          alt="The Best Academy"
+          style={{
+            width: "clamp(132px, 38vw, 180px)",
+            height: "clamp(132px, 38vw, 180px)",
+            borderRadius: "50%",
+            objectFit: "cover",
+            background: "#fff",
+            boxShadow: "0 14px 38px rgba(31,41,55,0.16)",
+          }}
+        />
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          fontFamily: FONT_EN,
+          fontWeight: 700,
+          textAlign: "center",
+        }}>
+          <span style={{ color: "#C9A227", fontSize: "clamp(15px, 4vw, 18px)" }}>
+            Powered by
+          </span>
+          <span style={{ color: "#C9A227", fontSize: "clamp(20px, 5.5vw, 26px)" }}>
+            The Best Academy
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div dir="rtl" style={{
       minHeight: "100vh",
@@ -2355,8 +2415,8 @@ function App() {
               src={ACADEMY_LOGO}
               alt="The Best Academy"
               style={{
-                width: 42,
-                height: 42,
+                width: 48,
+                height: 48,
                 borderRadius: "50%",
                 objectFit: "cover",
                 background: "#fff",
@@ -2374,8 +2434,8 @@ function App() {
               fontWeight: 600,
               lineHeight: 1.15,
             }}>
-              <span style={{ fontSize: 9 }}>Powered by</span>
-              <span style={{ fontSize: 11, whiteSpace: "nowrap" }}>The Best Academy</span>
+              <span style={{ fontSize: 10 }}>Powered by</span>
+              <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>The Best Academy</span>
             </div>
           </div>
         </div>
