@@ -2344,19 +2344,40 @@ function App() {
             {firstName && <div style={{ fontSize: 11, color: PALETTE.secondary, marginTop: 1 }}>أهلاً، {firstName} 👋</div>}
           </div>
         </div>
-          <img
-            src={ACADEMY_LOGO}
-            alt="The Best Academy"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: "50%",
-              objectFit: "cover",
-              background: "#fff",
-              border: `1px solid ${PALETTE.border}`,
-              flexShrink: 0,
-            }}
-          />
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            minWidth: 0,
+            direction: "ltr",
+          }}>
+            <img
+              src={ACADEMY_LOGO}
+              alt="The Best Academy"
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: "50%",
+                objectFit: "cover",
+                background: "#fff",
+                border: `1px solid ${PALETTE.border}`,
+                flexShrink: 0,
+              }}
+            />
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              maxWidth: 96,
+              color: PALETTE.primary,
+              fontFamily: FONT_EN,
+              fontWeight: 600,
+              lineHeight: 1.15,
+            }}>
+              <span style={{ fontSize: 9 }}>Powered by</span>
+              <span style={{ fontSize: 11, whiteSpace: "nowrap" }}>The Best Academy</span>
+            </div>
+          </div>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end", position: "relative", width: "100%" }}>
           <button
